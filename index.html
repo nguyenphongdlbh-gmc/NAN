@@ -1,0 +1,3098 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Du Lịch Thông Minh 3D Biên Hòa - Đồng Nai | Giáo Dục Di Sản Học Đường</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Google Fonts: Nunito & Be Vietnam Pro -->
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+
+    <!-- Early global definition of handleImageError so inline img onerror never fails -->
+    <script>
+        window.handleImageError = function (imgEl) {
+            if (!imgEl || imgEl.dataset.fallbackApplied === 'true') return;
+            imgEl.dataset.fallbackApplied = 'true';
+            const label = encodeURIComponent(imgEl.dataset.landmarkName || imgEl.alt || 'Di Tích Biên Hòa - Đồng Nai');
+            imgEl.src = 'https://placehold.co/900x550/0f172a/38bdf8?text=' + label;
+        };
+    </script>
+
+    <style>
+        * {
+            font-family: 'Be Vietnam Pro', sans-serif;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        h1, h2, h3, .font-display {
+            font-family: 'Nunito', sans-serif;
+        }
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #0b192c;
+        }
+        /* Glassmorphism HUD panels inspired by StarGlobal 3D Smart Tourism */
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.78);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid rgba(255, 255, 255, 0.16);
+            box-shadow: 0 12px 32px -4px rgba(0, 0, 0, 0.45);
+        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.3);
+            border-radius: 8px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(56, 189, 248, 0.6);
+            border-radius: 8px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(56, 189, 248, 0.9);
+        }
+        /* Panorama 360 smooth preview animation */
+        @keyframes panImage {
+            0% { transform: scale(1.08) translateX(-2%); }
+            50% { transform: scale(1.14) translateX(2%); }
+            100% { transform: scale(1.08) translateX(-2%); }
+        }
+        .pano-active {
+            animation: panImage 18s ease-in-out infinite;
+        }
+        /* Audio Equalizer bars */
+        @keyframes eqBar {
+            0%, 100% { height: 5px; }
+            50% { height: 18px; }
+        }
+        .wave-bar {
+            display: inline-block;
+            width: 3px;
+            height: 5px;
+            margin: 0 1.5px;
+            border-radius: 2px;
+            background: #f472b6;
+            transition: height 0.2s ease;
+        }
+        .speaking .wave-bar:nth-child(1) { animation: eqBar 0.55s infinite 0.0s; }
+        .speaking .wave-bar:nth-child(2) { animation: eqBar 0.55s infinite 0.15s; }
+        .speaking .wave-bar:nth-child(3) { animation: eqBar 0.55s infinite 0.3s; }
+        .speaking .wave-bar:nth-child(4) { animation: eqBar 0.55s infinite 0.1s; }
+        .speaking .wave-bar:nth-child(5) { animation: eqBar 0.55s infinite 0.25s; }
+    </style>
+</head>
+<body class="relative w-full h-full overflow-hidden">
+
+    <!-- ==================== 1. INTERACTIVE 3D/2.5D MAP CANVAS ==================== -->
+    <canvas id="mapCanvas" class="block w-full h-full cursor-grab active:cursor-grabbing"></canvas>
+
+    <!-- ==================== 2. STUDENT LOGIN & CHARACTER SELECTION MODAL ==================== -->
+    <div id="loginModal" class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-950/85 backdrop-blur-md overflow-y-auto">
+        <div class="relative w-full max-w-4xl bg-white rounded-3xl shadow-2xl border-4 border-sky-400 overflow-hidden my-auto">
+            <!-- Top Decorative Header -->
+            <div class="bg-gradient-to-r from-sky-700 via-teal-600 to-emerald-600 p-5 sm:p-6 text-white relative overflow-hidden">
+                <div class="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div class="flex items-center gap-3.5">
+                        <div class="w-14 h-14 rounded-2xl bg-amber-400 text-slate-950 flex items-center justify-center text-2xl font-black shadow-lg shrink-0">
+                            <i class="fa-solid fa-map-location-dot"></i>
+                        </div>
+                        <div>
+                            <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white/20 text-amber-200 text-xs font-extrabold uppercase tracking-wider mb-1">
+                                <i class="fa-solid fa-cube"></i> Smart Tourism 3D • Giáo Dục Địa Phương
+                            </div>
+                            <h1 class="text-xl sm:text-2xl font-black tracking-tight">KHÁM PHÁ DI SẢN BIÊN HÒA - ĐỒNG NAI</h1>
+                            <p class="text-xs sm:text-sm text-sky-100">Hành trình tương tác 3D tìm hiểu Lịch sử - Văn hóa - Danh thắng vùng đất hơn 325 năm</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Login Form Body -->
+            <div class="p-5 sm:p-7 grid grid-cols-1 lg:grid-cols-12 gap-6 bg-slate-50">
+                <!-- Left Column: Student Info Inputs -->
+                <div class="lg:col-span-6 space-y-4">
+                    <h2 class="text-base font-extrabold text-slate-800 flex items-center gap-2">
+                        <span class="w-6 h-6 rounded-full bg-sky-600 text-white text-xs flex items-center justify-center font-black">1</span>
+                        THÔNG TIN HỌC SINH THAM QUAN
+                    </h2>
+
+                    <div class="space-y-3 bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+                        <div>
+                            <label class="block text-xs font-extrabold text-slate-700 uppercase mb-1">
+                                <i class="fa-solid fa-user-graduate text-sky-600 mr-1"></i>Họ và tên học sinh <span class="text-red-500">*</span>
+                            </label>
+                            <input id="inputStudentName" type="text" value="Nguyễn Minh Khôi" placeholder="Nhập họ và tên của em..."
+                                class="w-full px-3.5 py-2.5 rounded-xl border-2 border-slate-200 focus:border-sky-500 outline-none text-sm font-bold text-slate-800 transition">
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-extrabold text-slate-700 uppercase mb-1">
+                                    <i class="fa-solid fa-chalkboard-user text-teal-600 mr-1"></i>Lớp <span class="text-red-500">*</span>
+                                </label>
+                                <input id="inputStudentClass" type="text" value="5/1" placeholder="VD: 5/1, 6A2..."
+                                    class="w-full px-3.5 py-2.5 rounded-xl border-2 border-slate-200 focus:border-sky-500 outline-none text-sm font-bold text-slate-800 transition">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-extrabold text-slate-700 uppercase mb-1">
+                                    <i class="fa-solid fa-school text-amber-600 mr-1"></i>Trường <span class="text-red-500">*</span>
+                                </label>
+                                <input id="inputStudentSchool" type="text" value="TH Nguyễn An Ninh - Biên Hòa" placeholder="Nhập tên trường..."
+                                    class="w-full px-3.5 py-2.5 rounded-xl border-2 border-slate-200 focus:border-sky-500 outline-none text-sm font-bold text-slate-800 transition">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Transport Mode Selector in Login -->
+                    <h2 class="text-base font-extrabold text-slate-800 flex items-center gap-2 pt-1">
+                        <span class="w-6 h-6 rounded-full bg-sky-600 text-white text-xs flex items-center justify-center font-black">2</span>
+                        CHỌN PHƯƠNG TIỆN DI CHUYỂN TRÊN BẢN ĐỒ
+                    </h2>
+                    <div class="grid grid-cols-2 gap-3">
+                        <button type="button" id="loginTransportWalk" onclick="selectLoginTransport('walk')"
+                            class="p-3 rounded-2xl border-2 border-sky-500 bg-sky-50/90 text-left flex items-center gap-3 transition shadow-sm">
+                            <div class="w-11 h-11 rounded-xl bg-sky-600 text-white flex items-center justify-center text-xl shrink-0">
+                                <i class="fa-solid fa-person-running"></i>
+                            </div>
+                            <div>
+                                <div class="font-extrabold text-sm text-slate-900">Chạy bộ</div>
+                                <div class="text-[11px] text-slate-600 font-semibold">Khám phá thong thả từng di tích</div>
+                            </div>
+                        </button>
+
+                        <button type="button" id="loginTransportBike" onclick="selectLoginTransport('bike')"
+                            class="p-3 rounded-2xl border-2 border-slate-200 bg-white hover:bg-slate-50 text-left flex items-center gap-3 transition shadow-sm">
+                            <div class="w-11 h-11 rounded-xl bg-amber-500 text-white flex items-center justify-center text-xl shrink-0">
+                                <i class="fa-solid fa-bicycle"></i>
+                            </div>
+                            <div>
+                                <div class="font-extrabold text-sm text-slate-900">Đi Xe Đạp</div>
+                                <div class="text-[11px] text-slate-600 font-semibold">Di chuyển nhanh quanh Biên Hòa</div>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Right Column: Student Avatar Selection (Male / Female) -->
+                <div class="lg:col-span-6 flex flex-col justify-between space-y-4">
+                    <div>
+                        <h2 class="text-base font-extrabold text-slate-800 flex items-center gap-2 mb-3">
+                            <span class="w-6 h-6 rounded-full bg-sky-600 text-white text-xs flex items-center justify-center font-black">3</span>
+                            CHỌN NHÂN VẬT HỌC SINH ĐỒNG HÀNH
+                        </h2>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <!-- Male Student Card -->
+                            <div id="charCardMale" onclick="selectGender('male')"
+                                class="cursor-pointer p-4 rounded-2xl border-4 border-sky-500 bg-gradient-to-b from-sky-50 to-white text-center relative transition transform hover:-translate-y-0.5 shadow-md">
+                                <span id="badgeMale" class="absolute top-2.5 right-2.5 w-6 h-6 rounded-full bg-sky-600 text-white text-xs flex items-center justify-center shadow">
+                                    <i class="fa-solid fa-check"></i>
+                                </span>
+                                <!-- SVG Male Student with Red Scarf -->
+                                <div class="w-24 h-28 mx-auto flex items-center justify-center">
+                                    <svg viewBox="0 0 120 140" class="w-full h-full drop-shadow">
+                                        <ellipse cx="60" cy="130" rx="28" ry="6" fill="rgba(0,0,0,0.15)"/>
+                                        <!-- Legs & Shoes -->
+                                        <rect x="46" y="92" width="10" height="32" rx="4" fill="#1e3a8a"/>
+                                        <rect x="64" y="92" width="10" height="32" rx="4" fill="#1e3a8a"/>
+                                        <rect x="43" y="120" width="14" height="8" rx="4" fill="#0284c7"/>
+                                        <rect x="63" y="120" width="14" height="8" rx="4" fill="#0284c7"/>
+                                        <!-- White School Shirt -->
+                                        <rect x="38" y="54" width="44" height="42" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="2"/>
+                                        <!-- Red Pioneer Scarf (Khăn quàng đỏ) -->
+                                        <polygon points="44,55 76,55 60,78" fill="#ef4444"/>
+                                        <polygon points="56,68 64,68 62,88 54,86" fill="#dc2626"/>
+                                        <!-- Head & Short Boy Hair -->
+                                        <circle cx="60" cy="34" r="20" fill="#fde68a"/>
+                                        <path d="M40 30 Q42 12 62 12 Q80 12 80 30 Q72 22 58 24 Q45 24 40 30 Z" fill="#1e293b"/>
+                                        <!-- Happy Eyes & Smile -->
+                                        <circle cx="53" cy="34" r="2.5" fill="#0f172a"/>
+                                        <circle cx="67" cy="34" r="2.5" fill="#0f172a"/>
+                                        <path d="M54 42 Q60 47 66 42" stroke="#e11d48" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+                                    </svg>
+                                </div>
+                                <div class="font-black text-slate-900 text-sm mt-1">HỌC SINH NAM</div>
+                                <div class="text-xs text-sky-700 font-bold">Năng động • Ham học hỏi</div>
+                            </div>
+
+                            <!-- Female Student Card -->
+                            <div id="charCardFemale" onclick="selectGender('female')"
+                                class="cursor-pointer p-4 rounded-2xl border-4 border-slate-200 bg-white hover:bg-pink-50/40 text-center relative transition transform hover:-translate-y-0.5 shadow-sm">
+                                <span id="badgeFemale" class="hidden absolute top-2.5 right-2.5 w-6 h-6 rounded-full bg-pink-500 text-white text-xs flex items-center justify-center shadow">
+                                    <i class="fa-solid fa-check"></i>
+                                </span>
+                                <!-- SVG Female Student with Red Scarf -->
+                                <div class="w-24 h-28 mx-auto flex items-center justify-center">
+                                    <svg viewBox="0 0 120 140" class="w-full h-full drop-shadow">
+                                        <ellipse cx="60" cy="130" rx="28" ry="6" fill="rgba(0,0,0,0.15)"/>
+                                        <!-- Ponytail Hair Back -->
+                                        <circle cx="36" cy="36" r="10" fill="#1e293b"/>
+                                        <circle cx="84" cy="36" r="10" fill="#1e293b"/>
+                                        <!-- Legs & Shoes -->
+                                        <rect x="47" y="94" width="9" height="30" rx="4" fill="#fde68a"/>
+                                        <rect x="64" y="94" width="9" height="30" rx="4" fill="#fde68a"/>
+                                        <rect x="44" y="120" width="13" height="8" rx="4" fill="#ec4899"/>
+                                        <rect x="63" y="120" width="13" height="8" rx="4" fill="#ec4899"/>
+                                        <!-- School Skirt & White Shirt -->
+                                        <polygon points="36,98 84,98 76,76 44,76" fill="#1e3a8a"/>
+                                        <rect x="40" y="54" width="40" height="28" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="2"/>
+                                        <!-- Red Pioneer Scarf -->
+                                        <polygon points="44,55 76,55 60,76" fill="#ef4444"/>
+                                        <polygon points="56,66 64,66 62,85 55,84" fill="#dc2626"/>
+                                        <!-- Head & Girl Hair -->
+                                        <circle cx="60" cy="34" r="20" fill="#fde68a"/>
+                                        <path d="M39 32 Q40 11 60 11 Q80 11 81 32 Q70 21 60 23 Q50 21 39 32 Z" fill="#1e293b"/>
+                                        <!-- Ribbons -->
+                                        <circle cx="40" cy="28" r="4" fill="#f43f5e"/>
+                                        <circle cx="80" cy="28" r="4" fill="#f43f5e"/>
+                                        <!-- Eyes & Smile -->
+                                        <circle cx="53" cy="34" r="2.5" fill="#0f172a"/>
+                                        <circle cx="67" cy="34" r="2.5" fill="#0f172a"/>
+                                        <path d="M54 42 Q60 47 66 42" stroke="#e11d48" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+                                    </svg>
+                                </div>
+                                <div class="font-black text-slate-900 text-sm mt-1">HỌC SINH NỮ</div>
+                                <div class="text-xs text-pink-600 font-bold">Duyên dáng • Yêu lịch sử</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Error notice if fields empty -->
+                    <div id="loginErrorMsg" class="hidden p-2.5 rounded-xl bg-red-100 border border-red-300 text-red-700 text-xs font-bold text-center">
+                        Vui lòng nhập đầy đủ Họ tên, Lớp và Trường của em trước khi xuất phát nhé!
+                    </div>
+
+                    <!-- Start Button -->
+                    <button type="button" onclick="startJourney()"
+                        class="w-full py-3.5 px-6 rounded-2xl bg-gradient-to-r from-amber-400 via-orange-500 to-rose-500 hover:from-amber-300 hover:to-rose-400 text-slate-950 font-black text-base shadow-xl flex items-center justify-center gap-2.5 transition transform active:scale-95">
+                        <i class="fa-solid fa-compass text-lg"></i>
+                        <span>BẮT ĐẦU HÀNH TRÌNH KHÁM PHÁ BIÊN HÒA</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== 3. SMART TOURISM 3D HUD OVERLAY ==================== -->
+    <div id="hudContainer" class="pointer-events-none fixed inset-0 z-20 flex flex-col justify-between p-3 sm:p-4">
+
+        <!-- TOP BAR: Student Profile Card + Camera/Admin Controls -->
+        <div class="flex items-start justify-between gap-2">
+            <!-- Top-Left Student Card -->
+            <div class="pointer-events-auto glass-panel rounded-2xl p-2.5 sm:px-4 sm:py-2.5 text-white flex items-center gap-3 border border-sky-400/30">
+                <div id="hudAvatarBadge" class="w-11 h-11 rounded-xl bg-gradient-to-br from-sky-500 to-teal-500 flex items-center justify-center text-2xl shadow-md shrink-0">
+                    👦
+                </div>
+                <div class="min-w-0">
+                    <div class="flex items-center gap-2">
+                        <span id="hudStudentName" class="font-extrabold text-sm sm:text-base text-amber-300 truncate">Nguyễn Minh Khôi</span>
+                        <span id="hudStudentClass" class="px-2 py-0.5 rounded-full bg-sky-500/30 border border-sky-300/30 text-[11px] font-extrabold text-sky-200">Lớp 5/1</span>
+                    </div>
+                    <div id="hudStudentSchool" class="text-xs text-slate-300 truncate">TH Nguyễn An Ninh - Biên Hòa</div>
+                    <div class="flex items-center gap-3 mt-1 text-[11px] font-bold">
+                        <span class="text-emerald-300"><i class="fa-solid fa-location-dot mr-1"></i>Đã đến: <b id="hudVisitedCount">0/8</b></span>
+                        <span class="text-amber-300"><i class="fa-solid fa-star mr-1"></i>Sao Di Sản: <b id="hudQuizScore">0/8</b></span>
+                    </div>
+                </div>
+                <button onclick="reopenLoginModal()" title="Đổi thông tin học sinh / nhân vật"
+                    class="ml-1 px-2.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-xs text-sky-200 font-bold transition">
+                    <i class="fa-solid fa-user-pen"></i>
+                </button>
+            </div>
+
+            <!-- Top-Right Controls (StarGlobal 3D style) -->
+            <div class="pointer-events-auto hidden sm:flex items-center gap-2">
+                <button onclick="openAdminGalleryModal()" class="glass-panel text-amber-300 hover:bg-amber-500/20 border border-amber-400/40 px-3.5 py-2.5 rounded-2xl text-xs font-extrabold flex items-center gap-2 transition shadow-lg">
+                    <i class="fa-solid fa-cloud-arrow-up text-amber-400"></i>
+                    <span>Quản trị Kho Ảnh & Giọng Đọc</span>
+                </button>
+                <button onclick="resetCameraToPlayer()" class="glass-panel text-white hover:text-sky-300 px-3.5 py-2.5 rounded-2xl text-xs font-bold flex items-center gap-2 transition">
+                    <i class="fa-solid fa-location-crosshairs text-sky-400"></i>
+                    <span>Theo dõi Nhân vật</span>
+                </button>
+                <button onclick="zoomMap(0.15)" title="Phóng to" class="glass-panel text-white hover:bg-white/10 w-10 h-10 rounded-2xl flex items-center justify-center transition">
+                    <i class="fa-solid fa-magnifying-glass-plus"></i>
+                </button>
+                <button onclick="zoomMap(-0.15)" title="Thu nhỏ" class="glass-panel text-white hover:bg-white/10 w-10 h-10 rounded-2xl flex items-center justify-center transition">
+                    <i class="fa-solid fa-magnifying-glass-minus"></i>
+                </button>
+                <button onclick="toggleSidebar()" class="glass-panel text-white bg-sky-600/80 hover:bg-sky-500 px-3.5 py-2.5 rounded-2xl text-xs font-bold flex items-center gap-2 transition">
+                    <i class="fa-solid fa-list-ul"></i>
+                    <span>Danh sách Di tích (8)</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- RIGHT SIDEBAR: Quick Tour Locations List -->
+        <div id="locationsSidebar" class="pointer-events-auto fixed top-20 right-3 bottom-20 w-72 sm:w-80 glass-panel rounded-3xl p-4 text-white flex flex-col z-30 transition-transform duration-300 translate-x-0">
+            <div class="flex items-center justify-between pb-3 mb-2 border-b border-white/15">
+                <div>
+                    <h3 class="font-extrabold text-sm text-amber-300 flex items-center gap-1.5">
+                        <i class="fa-solid fa-map-pin text-rose-400"></i> 8 ĐỊA DANH TIÊU BIỂU BIÊN HÒA
+                    </h3>
+                    <p class="text-[11px] text-sky-200">Nháy chọn địa điểm để nhân vật di chuyển tới</p>
+                </div>
+                <button onclick="toggleSidebar()" class="w-7 h-7 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-xs">
+                    <i class="fa-solid fa-chevron-right"></i>
+                </button>
+            </div>
+            <div id="sidebarLocationsList" class="flex-1 overflow-y-auto space-y-2 pr-1">
+                <!-- Populated dynamically -->
+            </div>
+            <div class="pt-3 mt-2 border-t border-white/15 flex items-center justify-between gap-2">
+                <button onclick="openCertificateModal()" class="w-full py-2 px-3 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 text-slate-950 font-extrabold text-xs flex items-center justify-center gap-1.5 shadow">
+                    <i class="fa-solid fa-award"></i>
+                    <span>Xem Giấy Chứng Nhận Di Sản</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- BOTTOM DOCK: Transport Switcher (Walk / Bicycle) & Status -->
+        <div class="pointer-events-auto mx-auto glass-panel rounded-3xl px-3 py-2 sm:px-5 sm:py-2.5 text-white flex flex-wrap items-center justify-center gap-2 sm:gap-4 border border-sky-400/30 shadow-2xl">
+            <div class="flex items-center gap-1.5 bg-slate-900/80 p-1 rounded-2xl border border-white/10">
+                <button id="btnModeWalk" onclick="setTransport('walk')"
+                    class="px-3.5 py-2 rounded-xl text-xs font-extrabold flex items-center gap-1.5 transition bg-sky-500 text-white shadow">
+                    <i class="fa-solid fa-person-running"></i>
+                    <span>Chạy bộ</span>
+                </button>
+                <button id="btnModeBike" onclick="setTransport('bike')"
+                    class="px-3.5 py-2 rounded-xl text-xs font-extrabold flex items-center gap-1.5 transition text-slate-300 hover:text-white">
+                    <i class="fa-solid fa-bicycle"></i>
+                    <span>Đi Xe Đạp</span>
+                </button>
+            </div>
+
+            <div class="hidden md:flex items-center gap-2 text-xs text-sky-200 font-semibold px-2">
+                <i class="fa-solid fa-route text-amber-400"></i>
+                <span id="hudTargetStatus">Nháy chuột vào một địa danh trên bản đồ hoặc dùng phím mũi tên để di chuyển!</span>
+            </div>
+
+            <!-- Mobile Action Buttons -->
+            <button onclick="openAdminGalleryModal()" class="sm:hidden px-3 py-2 rounded-2xl bg-amber-500 text-slate-950 text-xs font-extrabold flex items-center gap-1.5">
+                <i class="fa-solid fa-cloud-arrow-up"></i>
+                <span>Upload Ảnh</span>
+            </button>
+            <button onclick="toggleSidebar()" class="sm:hidden px-3 py-2 rounded-2xl bg-sky-500 text-white text-xs font-extrabold flex items-center gap-1.5">
+                <i class="fa-solid fa-map-location-dot"></i>
+                <span>8 Địa điểm</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- ==================== 4. LANDMARK DETAIL, REAL PHOTO UPLOAD & SOUTHERN VOICE MODAL ==================== -->
+    <div id="landmarkModal" class="fixed inset-0 z-40 hidden items-center justify-center p-2 sm:p-5 bg-slate-950/80 backdrop-blur-md">
+        <div class="relative w-full max-w-6xl bg-white rounded-3xl shadow-2xl border-4 border-sky-400 overflow-hidden max-h-[94vh] flex flex-col">
+            <!-- Modal Header -->
+            <div class="bg-gradient-to-r from-slate-900 via-sky-900 to-teal-900 px-5 py-3.5 text-white flex items-center justify-between shrink-0">
+                <div class="flex items-center gap-3 min-w-0">
+                    <div class="w-10 h-10 rounded-2xl bg-amber-400 text-slate-950 flex items-center justify-center text-lg font-black shrink-0">
+                        <i class="fa-solid fa-landmark"></i>
+                    </div>
+                    <div class="min-w-0">
+                        <span id="modalCategoryBadge" class="text-[10px] px-2.5 py-0.5 rounded-full bg-amber-400/20 text-amber-300 border border-amber-400/40 font-extrabold uppercase tracking-wider">
+                            Di tích Lịch sử Quốc gia
+                        </span>
+                        <h2 id="modalTitle" class="text-lg sm:text-xl font-black truncate mt-0.5">Văn Miếu Trấn Biên</h2>
+                    </div>
+                </div>
+                <button onclick="closeLandmarkModal()" class="w-9 h-9 rounded-full bg-white/15 hover:bg-red-500 text-white flex items-center justify-center transition shrink-0">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <!-- Modal Body Grid -->
+            <div class="flex-1 overflow-y-auto p-4 sm:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <!-- Left Column: Real Photo Viewer + Direct Admin Image Upload Area -->
+                <div class="lg:col-span-6 flex flex-col gap-3">
+                    <!-- Main Image Frame with Drag & Drop Upload Support -->
+                    <div id="photoDropZone"
+                        ondragover="handlePhotoDragOver(event)"
+                        ondragleave="handlePhotoDragLeave(event)"
+                        ondrop="handlePhotoDrop(event)"
+                        class="relative w-full h-64 sm:h-80 rounded-2xl overflow-hidden bg-slate-900 border-2 border-slate-200 shadow-inner group transition-all">
+                        <img id="modalMainImage" src="" alt="Hình ảnh thực tế di tích"
+                            class="w-full h-full object-cover pano-active transition-all duration-500"
+                            onerror="handleImageError(this)">
+
+                        <!-- Drag & Drop Overlay Prompt -->
+                        <div id="dropZoneOverlay" class="hidden absolute inset-0 bg-sky-900/85 backdrop-blur-sm z-30 flex flex-col items-center justify-center text-white p-4 border-4 border-dashed border-amber-400 rounded-2xl">
+                            <i class="fa-solid fa-cloud-arrow-up text-4xl text-amber-300 mb-2 animate-bounce"></i>
+                            <div class="font-extrabold text-base">Thả tệp ảnh vào đây để tải lên địa danh này!</div>
+                            <div class="text-xs text-sky-200">Hỗ trợ JPG, PNG, WEBP (Tự động lưu trữ vào bộ nhớ ứng dụng)</div>
+                        </div>
+
+                        <!-- Live Real Photo Badge -->
+                        <div class="absolute top-3 left-3 px-3 py-1 rounded-full bg-slate-900/80 backdrop-blur text-white text-xs font-bold flex items-center gap-1.5 border border-white/20">
+                            <i class="fa-solid fa-camera text-amber-400"></i>
+                            <span id="photoSourceBadge">Ảnh tư liệu thực tế • Biên Hòa</span>
+                        </div>
+
+                        <!-- Toggle 360 Pan Button -->
+                        <button onclick="togglePanoMotion()" class="absolute top-3 right-3 px-3 py-1 rounded-full bg-sky-600/90 hover:bg-sky-500 text-white text-xs font-bold flex items-center gap-1.5 shadow">
+                            <i class="fa-solid fa-arrows-left-right"></i>
+                            <span id="panoBtnText">Chế độ Toàn cảnh 360°</span>
+                        </button>
+
+                        <!-- Quick Admin Floating Upload Buttons directly on Photo Frame -->
+                        <div class="absolute bottom-11 right-3 z-20 flex items-center gap-1.5">
+                            <button onclick="triggerPhotoUpload('replace')" title="Thay thế ảnh đang hiển thị bằng tệp ảnh từ máy tính"
+                                class="px-3 py-1.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-extrabold text-xs flex items-center gap-1.5 shadow-lg border border-white/50 transition">
+                                <i class="fa-solid fa-file-image"></i>
+                                <span>Đổi ảnh này</span>
+                            </button>
+                            <button onclick="triggerPhotoUpload('append')" title="Tải thêm 1 hoặc nhiều ảnh thực tế từ máy tính"
+                                class="px-3 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-white font-extrabold text-xs flex items-center gap-1.5 shadow-lg border border-white/30 transition">
+                                <i class="fa-solid fa-cloud-arrow-up"></i>
+                                <span>+ Thêm ảnh thực tế</span>
+                            </button>
+                            <button onclick="deleteCurrentPhoto()" title="Xóa ảnh đang chọn"
+                                class="w-8 h-8 rounded-xl bg-red-500/90 hover:bg-red-600 text-white flex items-center justify-center text-xs shadow-lg border border-white/30 transition">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        </div>
+
+                        <!-- Caption Overlay -->
+                        <div class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-slate-950/95 via-slate-950/70 to-transparent p-3 pt-8 text-white flex items-center justify-between gap-2">
+                            <p id="modalImageCaption" class="text-xs sm:text-sm font-semibold text-sky-100 truncate"></p>
+                            <button onclick="editCurrentPhotoCaption()" title="Sửa chú thích ảnh" class="text-amber-300 hover:text-amber-200 text-xs shrink-0 font-bold flex items-center gap-1">
+                                <i class="fa-solid fa-pen"></i> Sửa chú thích
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Hidden File Inputs for Admin Image Upload -->
+                    <input type="file" id="adminPhotoInputAppend" accept="image/*" multiple class="hidden" onchange="handleAdminFileSelect(event, 'append')">
+                    <input type="file" id="adminPhotoInputReplace" accept="image/*" class="hidden" onchange="handleAdminFileSelect(event, 'replace')">
+
+                    <!-- Admin Upload Toolbar & Caption Quick Input -->
+                    <div id="captionEditBar" class="hidden p-2.5 rounded-xl bg-amber-50 border border-amber-300 flex items-center gap-2">
+                        <input id="inputPhotoCaption" type="text" placeholder="Nhập chú thích cho ảnh thực tế này..."
+                            class="flex-1 px-3 py-1.5 rounded-lg border border-amber-300 text-xs font-bold text-slate-800 outline-none focus:border-sky-500">
+                        <button onclick="saveCurrentPhotoCaption()" class="px-3 py-1.5 rounded-lg bg-sky-600 text-white text-xs font-extrabold hover:bg-sky-700">Lưu</button>
+                        <button onclick="document.getElementById('captionEditBar').classList.add('hidden')" class="px-2 py-1.5 text-slate-500 text-xs font-bold">Đóng</button>
+                    </div>
+
+                    <!-- Thumbnail Gallery Selector + Add Photo Slot -->
+                    <div>
+                        <div class="flex items-center justify-between mb-1.5">
+                            <span class="text-xs font-extrabold text-slate-700 flex items-center gap-1.5">
+                                <i class="fa-solid fa-images text-sky-600"></i>
+                                Bộ sưu tập ảnh thực tế (<span id="photoCountLabel">0</span> ảnh) - Nhấn hoặc kéo thả tệp ảnh để tải lên:
+                            </span>
+                            <div class="flex items-center gap-2">
+                                <span id="photoAutoSaveIndicator" class="text-[11px] font-extrabold text-emerald-600 flex items-center gap-1">
+                                    <i class="fa-solid fa-cloud-check"></i> Đã tự động lưu
+                                </span>
+                                <button onclick="resetLandmarkDefaultPhotos()" class="text-[11px] font-bold text-slate-500 hover:text-red-600 transition">
+                                    <i class="fa-solid fa-rotate-left mr-0.5"></i>Khôi phục mặc định
+                                </button>
+                            </div>
+                        </div>
+                        <div id="modalThumbnails" class="grid grid-cols-4 sm:grid-cols-5 gap-2">
+                            <!-- Dynamically filled with thumbnails + "+ Upload" card -->
+                        </div>
+                    </div>
+
+                    <!-- Address & Quick Metadata Box -->
+                    <div class="p-3.5 rounded-2xl bg-sky-50 border border-sky-200 text-slate-700 text-xs sm:text-sm space-y-1.5">
+                        <div class="flex items-start gap-2">
+                            <i class="fa-solid fa-location-dot text-red-500 mt-1"></i>
+                            <div><b>Vị trí:</b> <span id="modalAddress">Phường Bửu Long, TP. Biên Hòa, tỉnh Đồng Nai</span></div>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <i class="fa-solid fa-clock-rotate-left text-sky-600 mt-1"></i>
+                            <div><b>Năm dấu ấn:</b> <span id="modalYear">Khởi dựng năm 1715 (Thời chúa Nguyễn Phúc Chu)</span></div>
+                        </div>
+                        <div id="gdriveActiveLinkBox" class="hidden flex items-center justify-between gap-2 pt-1.5 border-t border-sky-200 text-xs">
+                            <div class="flex items-center gap-1.5 text-emerald-700 font-bold truncate">
+                                <i class="fa-brands fa-google-drive text-emerald-600"></i>
+                                <span id="gdriveActiveLinkText" class="truncate">Đã đồng bộ Google Drive</span>
+                            </div>
+                            <a id="gdriveOpenFileBtn" href="#" target="_blank" rel="noopener"
+                                class="px-2 py-0.5 rounded bg-emerald-600 text-white font-extrabold shrink-0 hover:bg-emerald-700">
+                                Mở link Drive
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column: Southern Female Voiceover Narration + Educational Tabs + Interactive Quiz -->
+                <div class="lg:col-span-6 flex flex-col justify-between space-y-4">
+                    <!-- Southern Female Voice Narration Player Box -->
+                    <div class="p-4 rounded-2xl bg-gradient-to-r from-slate-900 via-sky-950 to-teal-950 text-white shadow-lg border border-sky-400/30 space-y-3">
+                        <div class="flex flex-wrap items-center justify-between gap-2">
+                            <div class="flex items-center gap-2.5">
+                                <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-pink-500 to-rose-500 flex items-center justify-center text-white text-xl shadow border border-white/20">
+                                    👩‍🏫
+                                </div>
+                                <div>
+                                    <div class="flex items-center gap-1.5">
+                                        <span class="text-[11px] px-2 py-0.5 rounded-full bg-pink-500/30 border border-pink-400/40 text-pink-200 font-extrabold uppercase tracking-wider">
+                                            Cô Giáo Miền Nam Thuyết Minh
+                                        </span>
+                                        <span id="customAudioBadge" class="hidden text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/30 border border-emerald-400/40 text-emerald-200 font-bold">
+                                            File Thu Âm Chuẩn
+                                        </span>
+                                    </div>
+                                    <div id="activeVoiceNameDisplay" class="text-xs text-sky-200 font-bold mt-0.5">
+                                        Giọng Nữ Miền Nam truyền cảm • Biên Hòa
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Audio Wave Indicator -->
+                            <div id="audioWaveContainer" class="flex items-center h-6 px-2">
+                                <span class="wave-bar"></span>
+                                <span class="wave-bar"></span>
+                                <span class="wave-bar"></span>
+                                <span class="wave-bar"></span>
+                                <span class="wave-bar"></span>
+                            </div>
+
+                            <!-- Play / Stop Speech Button -->
+                            <button id="btnToggleSpeech" onclick="toggleNarration()"
+                                class="px-4 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-extrabold text-xs flex items-center gap-1.5 shadow transition">
+                                <i id="speechIcon" class="fa-solid fa-play"></i>
+                                <span id="speechBtnText">Nghe thuyết minh</span>
+                            </button>
+                        </div>
+
+                        <!-- Southern Female Voice Fine-Tuning & Custom Audio Upload Controls -->
+                        <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-white/10 text-xs">
+                            <div class="flex items-center gap-2 flex-1 min-w-[200px]">
+                                <i class="fa-solid fa-microphone-lines text-pink-400"></i>
+                                <select id="voiceSelectDropdown" onchange="handleVoiceSelectionChange()"
+                                    class="bg-slate-800/90 text-sky-100 border border-sky-400/30 rounded-lg px-2.5 py-1 text-xs font-bold outline-none flex-1 truncate">
+                                    <option value="auto-south-female">✨ Tự động ưu tiên Giọng Nữ Miền Nam (Chuẩn)</option>
+                                </select>
+                            </div>
+
+                            <div class="flex items-center gap-1.5">
+                                <input type="file" id="adminAudioUploadInput" accept="audio/*" class="hidden" onchange="handleCustomAudioUpload(event)">
+                                <button onclick="document.getElementById('adminAudioUploadInput').click()"
+                                    title="Tải file ghi âm giọng đọc miền Nam (.mp3, .wav) cho địa điểm này"
+                                    class="px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-sky-200 font-bold text-[11px] flex items-center gap-1 transition">
+                                    <i class="fa-solid fa-file-audio text-amber-300"></i>
+                                    <span>Tải file MP3 giọng đọc</span>
+                                </button>
+                                <button id="btnRecordVoice" onclick="toggleVoiceRecording()"
+                                    title="Thu âm trực tiếp giọng cô giáo miền Nam bằng Micro"
+                                    class="px-2.5 py-1 rounded-lg bg-rose-500/30 hover:bg-rose-500/50 border border-rose-400/40 text-rose-200 font-bold text-[11px] flex items-center gap-1 transition">
+                                    <i class="fa-solid fa-microphone"></i>
+                                    <span id="recordBtnText">Thu âm</span>
+                                </button>
+                                <button id="btnClearCustomAudio" onclick="clearCustomLandmarkAudio()"
+                                    title="Xóa file âm thanh tải lên để dùng giọng đọc AI"
+                                    class="hidden px-2 py-1 rounded-lg bg-red-500/30 hover:bg-red-500/50 text-red-200 text-[11px]">
+                                    <i class="fa-solid fa-xmark"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Live Narration Transcript Box -->
+                        <div id="modalNarrationText" class="text-sm text-sky-100 leading-relaxed bg-white/10 p-3 rounded-xl max-h-36 overflow-y-auto border border-white/10">
+                        </div>
+                    </div>
+
+                    <!-- Educational Lesson Points -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div class="p-3.5 rounded-2xl bg-amber-50 border border-amber-200">
+                            <div class="text-xs font-extrabold text-amber-800 uppercase flex items-center gap-1.5 mb-1">
+                                <i class="fa-solid fa-graduation-cap text-amber-600"></i> Ý nghĩa Lịch sử - Văn hóa
+                            </div>
+                            <p id="modalSignificance" class="text-xs sm:text-sm text-slate-700 leading-relaxed"></p>
+                        </div>
+                        <div class="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200">
+                            <div class="text-xs font-extrabold text-emerald-800 uppercase flex items-center gap-1.5 mb-1">
+                                <i class="fa-solid fa-hand-holding-heart text-emerald-600"></i> Em làm chiến sĩ nhỏ bảo tồn
+                            </div>
+                            <p id="modalStudentAction" class="text-xs sm:text-sm text-slate-700 leading-relaxed"></p>
+                        </div>
+                    </div>
+
+                    <!-- Interactive Mini Quiz for Students -->
+                    <div class="p-4 rounded-2xl bg-slate-50 border-2 border-sky-200 space-y-2.5">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-extrabold text-sky-800 uppercase flex items-center gap-1.5">
+                                <i class="fa-solid fa-circle-question text-sky-600"></i> Đố vui Lịch sử - Nhận Sao Di Sản
+                            </span>
+                            <span id="quizStatusBadge" class="text-[11px] px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800 font-bold">
+                                +1 Sao Di Sản ⭐
+                            </span>
+                        </div>
+                        <p id="quizQuestionText" class="text-sm font-extrabold text-slate-800"></p>
+                        <div id="quizOptionsContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                            <!-- Quiz options populated dynamically -->
+                        </div>
+                        <div id="quizFeedbackBox" class="hidden p-2.5 rounded-xl text-xs font-bold"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="bg-slate-100 px-6 py-3 border-t border-slate-200 flex items-center justify-between shrink-0">
+                <div class="text-xs text-slate-600 font-semibold">
+                    <i class="fa-solid fa-circle-info text-sky-600 mr-1"></i>
+                    Mẹo: Quản trị viên có thể nhấn <b>"+ Thêm ảnh thực tế"</b> hoặc kéo thả tệp ảnh từ máy tính vào khung ảnh để cập nhật hình ảnh địa danh.
+                </div>
+                <button onclick="closeLandmarkModal()" class="px-5 py-2 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-extrabold text-sm shadow transition">
+                    Tiếp tục hành trình <i class="fa-solid fa-person-walking-arrow-right ml-1"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== 5. ADMIN GALLERY & VOICE MANAGER MODAL ==================== -->
+    <div id="adminGalleryModal" class="fixed inset-0 z-50 hidden items-center justify-center p-3 sm:p-5 bg-slate-950/80 backdrop-blur-md">
+        <div class="relative w-full max-w-4xl bg-white rounded-3xl shadow-2xl border-4 border-amber-400 overflow-hidden max-h-[90vh] flex flex-col">
+            <div class="bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500 px-6 py-4 text-white flex items-center justify-between shrink-0">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center text-xl">
+                        <i class="fa-solid fa-images"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-lg sm:text-xl font-extrabold">QUẢN TRỊ KHO ẢNH THỰC TẾ & GIỌNG ĐỌC MIỀN NAM</h2>
+                        <p class="text-xs text-amber-100">Tải tệp ảnh thực tế từ máy tính cho từng địa danh Biên Hòa - Đồng Nai (Tự động lưu trữ bền vững)</p>
+                    </div>
+                </div>
+                <button onclick="closeAdminGalleryModal()" class="w-9 h-9 rounded-full bg-white/20 hover:bg-red-600 text-white flex items-center justify-center transition">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div class="p-4 sm:p-6 overflow-y-auto space-y-4 flex-1">
+                <!-- Google Drive Personal Cloud Sync Panel -->
+                <div class="p-4 rounded-2xl bg-gradient-to-r from-sky-50 via-blue-50 to-emerald-50 border-2 border-sky-300 space-y-3 shadow-sm">
+                    <div class="flex flex-wrap items-center justify-between gap-2">
+                        <div class="flex items-center gap-2.5">
+                            <div class="w-10 h-10 rounded-xl bg-white border border-sky-200 flex items-center justify-center text-xl text-sky-600 shadow-sm">
+                                <i class="fa-brands fa-google-drive"></i>
+                            </div>
+                            <div>
+                                <div class="text-sm font-black text-slate-900 flex items-center gap-2">
+                                    <span>KẾT NỐI GOOGLE DRIVE CÁ NHÂN (LƯU TRỮ ĐÁM MÂY VĨNH VIỄN)</span>
+                                    <span id="gdriveConnectionBadge" class="text-[10px] px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-300 font-extrabold">
+                                        Chưa kết nối
+                                    </span>
+                                </div>
+                                <p class="text-xs text-slate-600">Tự động upload ảnh & file ghi âm lên thư mục <b>BienHoa_SmartTourism3D_Media</b> trên Google Drive của bạn và lấy link chia sẻ vĩnh viễn.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button id="btnConnectGoogleDrive" type="button" onclick="connectGoogleDrive()"
+                                class="px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-extrabold flex items-center gap-1.5 shadow transition">
+                                <i class="fa-brands fa-google"></i>
+                                <span id="btnConnectDriveText">Kết nối Google Drive</span>
+                            </button>
+                            <button id="btnSyncAllToDrive" type="button" onclick="syncAllLocalMediaToGoogleDrive()"
+                                class="hidden px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold flex items-center gap-1.5 shadow transition">
+                                <i class="fa-solid fa-cloud-arrow-up"></i>
+                                <span>Đồng bộ tất cả lên Drive</span>
+                            </button>
+                            <button id="btnDisconnectDrive" type="button" onclick="disconnectGoogleDrive()"
+                                class="hidden px-2.5 py-2 rounded-xl bg-slate-200 hover:bg-red-100 text-slate-700 hover:text-red-700 text-xs font-bold transition" title="Ngắt kết nối Google Drive">
+                                <i class="fa-solid fa-right-from-bracket"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Google OAuth Client ID Config Bar -->
+                    <div class="grid grid-cols-1 md:grid-cols-12 gap-2 items-center bg-white/80 p-2.5 rounded-xl border border-sky-200">
+                        <div class="md:col-span-8">
+                            <label class="block text-[11px] font-extrabold text-slate-700 mb-0.5">
+                                Google OAuth 2.0 Client ID (Cấp quyền ghi vào Google Drive riêng của bạn):
+                            </label>
+                            <input id="inputGoogleClientId" type="text"
+                                placeholder="Dán Client ID dạng: 123456789-xxxxxx.apps.googleusercontent.com"
+                                class="w-full px-3 py-1.5 rounded-lg border border-slate-300 text-xs font-semibold text-slate-800 outline-none focus:border-blue-500">
+                        </div>
+                        <div class="md:col-span-4 flex items-end gap-1.5 pt-3 md:pt-4">
+                            <button type="button" onclick="saveGoogleClientIdConfig()"
+                                class="w-full py-1.5 px-3 rounded-lg bg-slate-800 hover:bg-slate-900 text-white text-xs font-extrabold transition">
+                                Lưu Client ID
+                            </button>
+                            <button type="button" onclick="toggleDriveGuideBox()"
+                                class="py-1.5 px-2.5 rounded-lg bg-sky-100 hover:bg-sky-200 text-sky-800 text-xs font-extrabold shrink-0" title="Hướng dẫn lấy Client ID miễn phí">
+                                <i class="fa-solid fa-circle-question"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Collapsible Quick Guide for Google Drive Client ID -->
+                    <div id="gdriveGuideBox" class="hidden p-3 rounded-xl bg-white border border-sky-200 text-xs text-slate-700 space-y-1">
+                        <div class="font-extrabold text-sky-800">Hướng dẫn 3 bước lấy Google Client ID miễn phí để lưu file trực tiếp vào Google Drive riêng:</div>
+                        <div>1. Truy cập <b>console.cloud.google.com</b> → Tạo dự án mới → Bật <b>Google Drive API</b>.</div>
+                        <div>2. Vào mục <b>Credentials (Thông tin xác thực)</b> → Tạo <b>OAuth 2.0 Client ID</b> (Loại: <i>Web application</i>) → Thêm địa chỉ trang web hiện tại vào <i>Authorized JavaScript origins</i>.</div>
+                        <div>3. Dán mã <code>...apps.googleusercontent.com</code> vào ô trên và nhấn <b>Kết nối Google Drive</b>. Mọi ảnh & file ghi âm upload sẽ tự động lưu vào Drive của bạn!</div>
+                    </div>
+
+                    <!-- Drive Sync Status & Folder Link -->
+                    <div id="gdriveSyncStatusBar" class="hidden flex flex-wrap items-center justify-between gap-2 text-xs bg-emerald-100/80 text-emerald-900 px-3 py-2 rounded-xl border border-emerald-300 font-bold">
+                        <span id="gdriveSyncStatusText"><i class="fa-solid fa-check-circle mr-1"></i>Sẵn sàng đồng bộ file lên Google Drive.</span>
+                        <a id="gdriveFolderLink" href="https://drive.google.com" target="_blank" rel="noopener"
+                            class="underline text-blue-700 hover:text-blue-900 font-extrabold flex items-center gap-1">
+                            <i class="fa-solid fa-folder-open"></i> Mở thư mục trên Google Drive
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Backup / Restore Bar -->
+                <div class="p-3.5 rounded-2xl bg-slate-100 border border-slate-200 flex flex-wrap items-center justify-between gap-3">
+                    <div class="text-xs text-slate-700 font-bold">
+                        <i class="fa-solid fa-database text-sky-600 mr-1"></i>
+                        Dữ liệu ảnh & âm thanh tải lên được lưu tự động bền vững nhiều lớp (Google Drive + IndexedDB + Bộ nhớ dự phòng). Bạn cũng có thể xuất/nhập tệp cấu hình:
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button onclick="exportCustomMediaJSON()" class="px-3 py-1.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-xs font-extrabold flex items-center gap-1.5 shadow">
+                            <i class="fa-solid fa-download"></i> Xuất gói dữ liệu (.json)
+                        </button>
+                        <input type="file" id="importJsonInput" accept=".json" class="hidden" onchange="importCustomMediaJSON(event)">
+                        <button onclick="document.getElementById('importJsonInput').click()" class="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold flex items-center gap-1.5 shadow">
+                            <i class="fa-solid fa-upload"></i> Nhập gói dữ liệu
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Grid of all 8 Landmarks for fast Photo Upload -->
+                <div id="adminLandmarksGrid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Populated via JS -->
+                </div>
+            </div>
+
+            <div class="bg-slate-100 px-6 py-3 border-t border-slate-200 flex items-center justify-between shrink-0">
+                <span id="adminSaveStatus" class="text-xs font-bold text-emerald-700">
+                    <i class="fa-solid fa-circle-check mr-1"></i>Tất cả hình ảnh tải lên đều được đồng bộ trực tiếp lên Bản đồ 3D.
+                </span>
+                <button onclick="closeAdminGalleryModal()" class="px-5 py-2 rounded-xl bg-slate-800 hover:bg-slate-900 text-white font-extrabold text-sm">
+                    Hoàn tất & Đóng
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== 6. CERTIFICATE OF COMPLETION MODAL ==================== -->
+    <div id="certificateModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md">
+        <div class="relative w-full max-w-2xl bg-gradient-to-br from-amber-50 via-white to-sky-50 rounded-3xl shadow-2xl border-8 border-double border-amber-400 p-6 sm:p-8 text-center">
+            <button onclick="closeCertificateModal()" class="absolute top-4 right-4 w-9 h-9 rounded-full bg-slate-200 hover:bg-red-500 hover:text-white text-slate-700 flex items-center justify-center transition">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <div class="w-16 h-16 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 text-white flex items-center justify-center text-3xl mx-auto shadow-lg mb-3">
+                <i class="fa-solid fa-medal"></i>
+            </div>
+            <div class="text-xs font-black uppercase tracking-widest text-amber-700">CHƯƠNG TRÌNH GIÁO DỤC LỊCH SỬ ĐỊA PHƯƠNG</div>
+            <h2 class="text-2xl sm:text-3xl font-black text-slate-900 mt-1">GIẤY CHỨNG NHẬN ĐẠI SỨ DI SẢN</h2>
+            <p class="text-xs text-slate-500 mt-1">Vùng đất Biên Hòa - Đồng Nai hơn 325 năm hình thành và phát triển</p>
+
+            <div class="my-5 p-5 rounded-2xl bg-white border-2 border-amber-200 shadow-inner space-y-2">
+                <div class="text-xs text-slate-500 font-bold">Trao tặng em học sinh:</div>
+                <div id="certStudentName" class="text-2xl font-black text-sky-700">Nguyễn Minh Khôi</div>
+                <div id="certStudentMeta" class="text-sm font-bold text-slate-700">Lớp: 5/1 • Trường: TH Nguyễn An Ninh - Biên Hòa</div>
+                <div class="pt-2 flex items-center justify-center gap-4 text-xs font-extrabold">
+                    <span class="px-3 py-1 rounded-full bg-emerald-100 text-emerald-800">
+                        Đã tham quan: <b id="certVisited">0/8</b> địa danh
+                    </span>
+                    <span class="px-3 py-1 rounded-full bg-amber-100 text-amber-800">
+                        Sao Di Sản: <b id="certStars">0/8</b> ⭐
+                    </span>
+                </div>
+            </div>
+
+            <p class="text-xs sm:text-sm text-slate-600 italic mb-5">
+                "Chúc em luôn chăm ngoan, học giỏi và tự hào gìn giữ, phát huy những giá trị lịch sử - văn hóa tốt đẹp của quê hương Biên Hòa - Đồng Nai!"
+            </p>
+            <button onclick="closeCertificateModal()" class="px-6 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-extrabold text-sm shadow-lg">
+                Đóng bảng chứng nhận
+            </button>
+        </div>
+    </div>
+
+    <!-- ==================== APPLICATION LOGIC ==================== -->
+    <script>
+        /********************************************************************
+         * 1. REAL BIÊN HÒA - ĐỒNG NAI HISTORICAL & TOURISM DATASET
+         * Uses verified Wikimedia Commons photographs of Bien Hoa landmarks
+         * + Southern Vietnamese Female Teacher ("Cô giáo miền Nam") narration
+         ********************************************************************/
+        const LANDMARKS = [
+            {
+                id: 'van-mieu-tran-bien',
+                name: 'Văn Miếu Trấn Biên',
+                shortName: 'Văn Miếu Trấn Biên',
+                category: 'Di tích Lịch sử Quốc gia',
+                address: 'Phường Bửu Long, TP. Biên Hòa, Đồng Nai',
+                year: 'Xây dựng năm 1715 (Chúa Nguyễn Phúc Chu)',
+                x: 420,
+                y: 260,
+                color: '#ef4444',
+                icon: 'fa-torii-gate',
+                photos: [
+                    {
+                        url: 'https://upload.wikimedia.org/wikipedia/commons/b/b5/V%C4%83n_mi%E1%BA%BFu_Tr%E1%BA%A5n_Bi%C3%AAn.jpg',
+                        caption: 'Cổng Tam Quan và khuôn viên Văn Miếu Trấn Biên tại phường Bửu Long, Biên Hòa.'
+                    },
+                    {
+                        url: 'https://upload.wikimedia.org/wikipedia/commons/3/36/Khu%C3%AA_V%C4%83n_C%C3%A1c_trong_V%C4%83n_mi%E1%BA%BFu_Tr%E1%BA%A5n_Bi%C3%AAn.jpg',
+                        caption: 'Khuê Văn Các uy nghiêm bên hồ Tịnh Quang trong Văn Miếu Trấn Biên.'
+                    },
+                    {
+                        url: 'https://upload.wikimedia.org/wikipedia/commons/8/87/Nh%C3%A0_bia_V%C4%83n_mi%E1%BA%BFu_Tr%E1%BA%A5n_Bi%C3%AAn.jpg',
+                        caption: 'Nhà bia truyền thống tôn vinh truyền thống hiếu học phương Nam.'
+                    }
+                ],
+                narration: 'Cô chào các em học sinh thân yêu nha! Bây giờ cô trò mình đang đứng tại Văn Miếu Trấn Biên ở phường Bửu Long, thành phố Biên Hòa mình đó các em. Ngôi văn miếu này được chúa Nguyễn Phúc Chu cho xây dựng từ năm 1715, là văn miếu đầu tiên của cả vùng đất phương Nam luôn nghen. Tới đây, các em sẽ thấy Khuê Văn Các soi bóng xuống hồ Tịnh Quang trong xanh, cùng tấm bia khắc dòng chữ "Hiền tài là nguyên khí quốc gia" và nhà thờ Bác Hồ kính yêu cùng các bậc danh nhân văn hóa dân tộc.',
+                significance: 'Là biểu tượng cho truyền thống tôn sư trọng đạo, hiếu học và trọng dụng nhân tài của người dân Biên Hòa - Đồng Nai cũng như cả vùng đất Nam Bộ suốt hơn 300 năm qua.',
+                studentAction: 'Chăm chỉ học tập, kính thầy yêu bạn, giữ gìn vệ sinh và trật tự trang nghiêm khi tham quan, dâng hương tại Văn Miếu.',
+                quiz: {
+                    question: 'Văn Miếu Trấn Biên tại Biên Hòa được chúa Nguyễn Phúc Chu cho xây dựng vào năm nào?',
+                    options: ['Năm 1715', 'Năm 1802', 'Năm 1698', 'Năm 1945'],
+                    correct: 0
+                }
+            },
+            {
+                id: 'kdl-buu-long',
+                name: 'Danh thắng Quốc gia Bửu Long',
+                shortName: 'KDL Bửu Long',
+                category: 'Danh lam Thắng cảnh Quốc gia',
+                address: 'Khu phố 4, Phường Bửu Long, TP. Biên Hòa',
+                year: 'Công nhận Danh thắng Quốc gia năm 1990',
+                x: 240,
+                y: 230,
+                color: '#10b981',
+                icon: 'fa-mountain-sun',
+                photos: [
+                    {
+                        url: 'https://upload.wikimedia.org/wikipedia/commons/9/9f/H%E1%BB%93_Long_%E1%BA%A8n.jpg',
+                        caption: 'Hồ Long Ẩn xanh biếc được ví như "Vịnh Hạ Long thu nhỏ" của miền Đông Nam Bộ.'
+                    },
+                    {
+                        url: 'https://upload.wikimedia.org/wikipedia/commons/a/a3/Khu_du_l%E1%BB%8Bch_B%E1%BB%ADu_Long.jpg',
+                        caption: 'Cảnh sắc non nước hữu tình kết hợp núi đá vôi và mặt hồ rộng lớn tại Bửu Long.'
+                    },
+                    {
+                        url: 'https://upload.wikimedia.org/wikipedia/commons/1/1d/Ch%C3%B9a_B%E1%BB%ADu_Phong.jpg',
+                        caption: 'Chùa cổ Bửu Phong tọa lạc trên đỉnh núi Bình Điện trong quần thể danh thắng Bửu Long.'
+                    }
+                ],
+                narration: 'Mời các em cùng cô ghé thăm Danh thắng Quốc gia Bửu Long nha! Nơi đây được bà con mình thương mến gọi là "Vịnh Hạ Long thu nhỏ" của miền Đông Nam Bộ đó các em. Nhìn kìa, mặt hồ Long Ẩn xanh biếc ôm lấy những vách đá dựng đứng tuyệt đẹp, vốn là dấu tích của làng nghề khai thác đá xanh Biên Hòa hồi xưa. Bước lên 99 bậc thang trên núi Bình Điện, các em còn được viếng ngôi chùa cổ Bửu Phong hơn ba trăm năm tuổi nữa đó nghen.',
+                significance: 'Sự kết hợp hài hòa giữa thiên nhiên kỳ vĩ, làng nghề điêu khắc đá truyền thống Bửu Long và di tích tâm linh cổ kính.',
+                studentAction: 'Không xả rác xuống hồ Long Ẩn, bảo vệ cây xanh và giới thiệu vẻ đẹp thiên nhiên Biên Hòa đến bạn bè khắp nơi.',
+                quiz: {
+                    question: 'Khu danh thắng Bửu Long với hồ Long Ẩn thường được du khách ví như địa danh nổi tiếng nào?',
+                    options: ['Vịnh Hạ Long thu nhỏ', 'Đà Lạt trên cao nguyên', 'Phố cổ Hội An', 'Đảo ngọc Phú Quốc'],
+                    correct: 0
+                }
+            },
+            {
+                id: 'den-nguyen-huu-canh',
+                name: 'Đền thờ Nguyễn Hữu Cảnh & Chùa Ông',
+                shortName: 'Đền Nguyễn Hữu Cảnh',
+                category: 'Di tích Lịch sử - Văn hóa Cấp Quốc gia',
+                address: 'Cù lao Phố, Phường Hiệp Hòa, TP. Biên Hòa',
+                year: 'Mốc lịch sử mở cõi năm 1698',
+                x: 690,
+                y: 620,
+                color: '#f59e0b',
+                icon: 'fa-landmark-dome',
+                photos: [
+                    {
+                        url: 'https://upload.wikimedia.org/wikipedia/commons/e/e9/%C4%90%E1%BB%81n_th%E1%BB%9D_Nguy%E1%BB%85n_H%E1%BB%AFu_C%E1%BA%A3nh_%28Bi%C3%AAn_H%C3%B2a%29.jpg',
+                        caption: 'Đền thờ Lễ Thành Hầu Nguyễn Hữu Cảnh tại Cù lao Phố, phường Hiệp Hòa, Biên Hòa.'
+                    },
+                    {
+                        url: 'https://upload.wikimedia.org/wikipedia/commons/4/4e/Ch%C3%B9a_%C3%94ng_%28Bi%C3%AAn_H%C3%B2a%29.jpg',
+                        caption: 'Thất Phủ Cổ Miếu (Chùa Ông) - Ngôi miếu cổ nhất Nam Bộ xây dựng năm 1684 bên sông Đồng Nai.'
+                    },
+                    {
+                        url: 'https://upload.wikimedia.org/wikipedia/commons/5/59/C%E1%BB%95ng_%C4%91%E1%BB%81n_th%E1%BB%9D_Nguy%E1%BB%85n_H%E1%BB%AFu_C%E1%BA%A3nh_%E1%BB%9F_Bi%C3%AAn_H%C3%B2a.jpg',
+                        caption: 'Cổng tam quan uy nghiêm của khu di tích Đền thờ Nguyễn Hữu Cảnh.'
+                    }
+                ],
+                narration: 'Cô trò mình vừa qua tới Cù lao Phố, phường Hiệp Hòa để viếng Đền thờ Đức Ông Lễ Thành Hầu Nguyễn Hữu Cảnh và Chùa Ông nè các em! Các em nhớ nghen, vào năm 1698, vâng mệnh chúa Nguyễn, Thống suất Nguyễn Hữu Cảnh đã đi thuyền vào kinh lược đất phương Nam, lập ra doanh Trấn Biên chính là vùng đất Biên Hòa - Đồng Nai của mình ngày nay. Nhờ công ơn mở cõi của Ông mà quê hương mình mới trù phú và phát triển như bây giờ đó các em.',
+                significance: 'Ghi dấu cột mốc lịch sử năm 1698 xác lập chủ quyền và nền hành chính vùng đất Biên Hòa - Gia Định trên bản đồ Tổ quốc.',
+                studentAction: 'Ghi nhớ công ơn các bậc tiền nhân đi mở đất, tìm hiểu lịch sử hơn 325 năm vùng đất Biên Hòa - Đồng Nai.',
+                quiz: {
+                    question: 'Ai là vị tướng vâng mệnh chúa Nguyễn vào kinh lược đất phương Nam và lập doanh Trấn Biên vào năm 1698?',
+                    options: ['Lễ Thành Hầu Nguyễn Hữu Cảnh', 'Danh tướng Trần Thượng Xuyên', 'Trịnh Hoài Đức', 'Nguyễn Tri Phương'],
+                    correct: 0
+                }
+            },
+            {
+                id: 'cau-ghenh',
+                name: 'Cầu Ghềnh (Cầu Gành) & Sông Đồng Nai',
+                shortName: 'Cầu Ghềnh & Cù Lao Phố',
+                category: 'Biểu tượng Lịch sử & Giao thông Biên Hòa',
+                address: 'Nối phường Hiệp Hòa (Cù lao Phố) và Bửu Hòa qua sông Đồng Nai',
+                year: 'Xây dựng lần đầu năm 1901 - Khánh thành năm 1904',
+                x: 560,
+                y: 720,
+                color: '#0ea5e9',
+                icon: 'fa-bridge-water',
+                photos: [
+                    {
+                        url: 'https://upload.wikimedia.org/wikipedia/commons/7/7c/C%E1%BA%A7u_Gh%E1%BB%81nh_m%E1%BB%9Bi.jpg',
+                        caption: 'Cầu Ghềnh bắc qua dòng sông Đồng Nai hiền hòa với những nhịp vòm thép đặc trưng.'
+                    },
+                    {
+                        url: 'https://upload.wikimedia.org/wikipedia/commons/d/d8/C%E1%BA%A7u_Gh%E1%BB%81nh%2C_Bi%C3%AAn_H%C3%B2a.jpg',
+                        caption: 'Tàu hỏa Bắc - Nam chạy qua cầu Ghềnh nối đôi bờ sông Đồng Nai và Cù lao Phố.'
+                    },
+                    {
+                        url: 'https://upload.wikimedia.org/wikipedia/commons/1/12/S%C3%B4ng_%C4%90%E1%BB%93ng_Nai_%C4%91o%E1%BA%A1n_qua_Bi%C3%AAn_H%C3%B2a.jpg',
+                        caption: 'Dòng sông Đồng Nai thơ mộng ôm lấy Cù lao Phố nhìn từ trung tâm thành phố Biên Hòa.'
+                    }
+                ],
+                narration: 'Trước mắt các em là cây Cầu Ghềnh, hay bà con miền Nam mình hay gọi thân thương là Cầu Gành đó nha! Cây cầu bắc ngang qua dòng sông Đồng Nai hiền hòa, được xây dựng từ đầu thế kỷ hai mươi để cho đoàn tàu lửa Bắc - Nam chạy qua. Dù đã được xây dựng mới lại vào năm 2016 với ba nhịp vòm thép vững chãi, nhưng hình ảnh Cầu Ghềnh soi bóng xuống dòng sông Đồng Nai vẫn luôn là biểu tượng thân thương nhất của người dân xứ Biên Hòa mình.',
+                significance: 'Chứng nhân lịch sử hơn một thế kỷ bên dòng sông Đồng Nai và là huyết mạch đường sắt quan trọng của đất nước.',
+                studentAction: 'Chấp hành nghiêm chỉnh an toàn giao thông đường sắt và đường thủy khi đi qua khu vực cầu và ven sông.',
+                quiz: {
+                    question: 'Cầu Ghềnh là cây cầu lịch sử bắc qua dòng sông nào của thành phố Biên Hòa?',
+                    options: ['Sông Đồng Nai', 'Sông Sài Gòn', 'Sông Tiền', 'Sông Hương'],
+                    correct: 0
+                }
+            },
+            {
+                id: 'thanh-co-bien-hoa',
+                name: 'Di tích Thành Cổ Biên Hòa (Thành Kèn)',
+                shortName: 'Thành Cổ Biên Hòa',
+                category: 'Di tích Kiến trúc - Quân sự Quốc gia',
+                address: 'Đường Phan Chu Trinh, Phường Quang Vinh, TP. Biên Hòa',
+                year: 'Xây dựng thời nhà Nguyễn (Thế kỷ XIX)',
+                x: 680,
+                y: 430,
+                color: '#d97706',
+                icon: 'fa-chess-rook',
+                photos: [
+                    {
+                        url: 'https://upload.wikimedia.org/wikipedia/commons/2/23/Th%C3%A0nh_c%E1%BB%95_Bi%C3%AAn_H%C3%B2a.jpg',
+                        caption: 'Tường thành bằng đá ong cổ kính và cổng vòm tại Di tích Thành cổ Biên Hòa.'
+                    },
+                    {
+                        url: 'https://upload.wikimedia.org/wikipedia/commons/a/a9/B%C3%AAn_trong_Th%C3%A0nh_c%E1%BB%95_Bi%C3%AAn_H%C3%B2a.jpg',
+                        caption: 'Kiến trúc biệt thự cổ và không gian trưng bày bên trong khuôn viên Thành cổ Biên Hòa.'
+                    },
+                    {
+                        url: 'https://upload.wikimedia.org/wikipedia/commons/b/b5/V%C4%83n_mi%E1%BA%BFu_Tr%E1%BA%A5n_Bi%C3%AAn.jpg',
+                        caption: 'Các di tích lịch sử thời Nguyễn tại Biên Hòa là tài sản văn hóa vô giá của vùng Đông Nam Bộ.'
+                    }
+                ],
+                narration: 'Các em ơi, cô trò mình vừa đặt chân tới Di tích Thành Cổ Biên Hòa, bà con địa phương mình còn gọi là "Thành Kèn" đó nha! Đây là tòa thành cổ duy nhất còn giữ được những bức tường xây bằng đá ong đỏ au đặc trưng ở miền Nam, được xây dựng từ thời vua Gia Long và Minh Mạng. Nơi đây đã chứng kiến biết bao trận chiến đấu kiên cường của cha ông ta để bảo vệ mảnh đất Biên Hòa thân yêu đó các em.',
+                significance: 'Di tích kiến trúc quân sự bằng đá ong độc đáo bậc nhất miền Nam, minh chứng cho lịch sử bảo vệ quê hương của cha ông.',
+                studentAction: 'Không vẽ bậy hay leo trèo lên các bức tường thành đá ong cổ kính, cùng tham gia tìm hiểu các hiện vật lịch sử tại đây.',
+                quiz: {
+                    question: 'Tường của Thành cổ Biên Hòa (Thành Kèn) được xây dựng chủ yếu bằng vật liệu truyền thống đặc trưng nào?',
+                    options: ['Đá ong', 'Gỗ lim', 'Đá cẩm thạch', 'Thép đúc'],
+                    correct: 0
+                }
+            },
+            {
+                id: 'nha-lao-tan-hiep',
+                name: 'Di tích Lịch sử Nhà Lao Tân Hiệp',
+                shortName: 'Nhà Lao Tân Hiệp',
+                category: 'Di tích Lịch sử Quốc gia',
+                address: 'Quốc lộ 1K / Nguyễn Ái Quốc, Phường Tân Tiến, TP. Biên Hòa',
+                year: 'Sự kiện Phá khám Tân Hiệp ngày 02/12/1956',
+                x: 1120,
+                y: 350,
+                color: '#dc2626',
+                icon: 'fa-monument',
+                photos: [
+                    {
+                        url: 'https://upload.wikimedia.org/wikipedia/commons/0/07/Di_t%C3%ADch_Nh%C3%A0_lao_T%C3%A2n_Hi%E1%BB%87p.jpg',
+                        caption: 'Tượng đài kỷ niệm cuộc nổi dậy phá khám Tân Hiệp hào hùng ngày 2/12/1956.'
+                    },
+                    {
+                        url: 'https://upload.wikimedia.org/wikipedia/commons/8/87/Nh%C3%A0_bia_V%C4%83n_mi%E1%BA%BFu_Tr%E1%BA%A5n_Bi%C3%AAn.jpg',
+                        caption: 'Không gian tưởng niệm các chiến sĩ cách mạng kiên trung của vùng đất miền Đông gian lao mà anh dũng.'
+                    }
+                ],
+                narration: 'Bây giờ cô cùng các em đến thăm Khu Di tích lịch sử Quốc gia Nhà lao Tân Hiệp nghen! Trong những năm tháng kháng chiến gian khổ, nơi đây từng giam giữ hàng ngàn chiến sĩ yêu nước. Vào ngày 2 tháng 12 năm 1956, các cô chú chiến sĩ cách mạng đã dũng cảm tổ chức cuộc nổi dậy phá khám Tân Hiệp vang dội, đưa hàng trăm cán bộ trở về căn cứ Chiến khu Đ an toàn. Các em nhớ luôn biết ơn sự hy sinh của thế hệ cha anh nha!',
+                significance: 'Địa chỉ đỏ giáo dục lòng yêu nước, ý chí kiên cường bất khuất và tinh thần đoàn kết của các thế hệ cha anh.',
+                studentAction: 'Biết ơn sự hy sinh của các anh hùng liệt sĩ, nỗ lực rèn luyện đạo đức và học tập tốt để xứng đáng với thế hệ đi trước.',
+                quiz: {
+                    question: 'Cuộc nổi dậy phá khám Tân Hiệp lịch sử của các chiến sĩ cách mạng diễn ra vào năm nào?',
+                    options: ['Năm 1956', 'Năm 1930', 'Năm 1975', 'Năm 1945'],
+                    correct: 0
+                }
+            },
+            {
+                id: 'cong-vien-bien-hung',
+                name: 'Công Viên Biên Hùng & Quảng Trường Tỉnh',
+                shortName: 'Công Viên Biên Hùng',
+                category: 'Không gian Văn hóa Trung tâm Biên Hòa',
+                address: 'Đường 30/4, Phường Trung Dũng, TP. Biên Hòa',
+                year: 'Trung tâm văn hóa - lịch sử đô thị Biên Hòa',
+                x: 880,
+                y: 470,
+                color: '#ec4899',
+                icon: 'fa-tree-city',
+                photos: [
+                    {
+                        url: 'https://upload.wikimedia.org/wikipedia/commons/1/12/S%C3%B4ng_%C4%90%E1%BB%93ng_Nai_%C4%91o%E1%BA%A1n_qua_Bi%C3%AAn_H%C3%B2a.jpg',
+                        caption: 'Không gian xanh mát tại trung tâm thành phố Biên Hòa năng động và hiện đại.'
+                    },
+                    {
+                        url: 'https://upload.wikimedia.org/wikipedia/commons/3/36/Khu%C3%AA_V%C4%83n_C%C3%A1c_trong_V%C4%83n_mi%E1%BA%BFu_Tr%E1%BA%A5n_Bi%C3%AAn.jpg',
+                        caption: 'Biên Hòa kết hợp hài hòa giữa truyền thống văn hiến và nhịp sống đô thị xanh.'
+                    }
+                ],
+                narration: 'Cô trò mình đang dạo mát ở Công viên Biên Hùng ngay trung tâm thành phố Biên Hòa nè các em! Cái tên "Biên Hùng" nghe thật tự hào phải không nào, vì nó nhắc nhớ về hào khí hùng cường của đất và người Biên Hòa mình đó. Mỗi dịp Tết đến xuân về hay ngày lễ thiếu nhi, công viên Biên Hùng lại rực rỡ cờ hoa để đón các em học sinh tới vui chơi và đọc sách.',
+                significance: 'Lá phổi xanh giữa lòng đô thị Biên Hòa, nơi gắn kết cộng đồng và tôn vinh niềm tự hào "Hào khí Biên Hùng".',
+                studentAction: 'Giữ gìn vệ sinh nơi công cộng, bỏ rác đúng nơi quy định và bảo vệ hoa cỏ khi vui chơi tại công viên.',
+                quiz: {
+                    question: 'Tên gọi của công viên nằm ngay trung tâm thành phố Biên Hòa gắn với "Hào khí Biên Hùng" là gì?',
+                    options: ['Công viên Biên Hùng', 'Công viên Tao Đàn', 'Công viên Bạch Đằng', 'Công viên Thống Nhất'],
+                    correct: 0
+                }
+            },
+            {
+                id: 'lang-buoi-tan-trieu',
+                name: 'Làng Bưởi Tân Triều Bên Sông Đồng Nai',
+                shortName: 'Làng Bưởi Tân Triều',
+                category: 'Du lịch Sinh thái & Đặc sản Truyền thống',
+                address: 'Cù lao Tân Triều (Tân Bình, giáp ranh TP. Biên Hòa)',
+                year: 'Hình thành từ năm 1869 bên dòng sông Đồng Nai',
+                x: 200,
+                y: 540,
+                color: '#84cc16',
+                icon: 'fa-lemon',
+                photos: [
+                    {
+                        url: 'https://upload.wikimedia.org/wikipedia/commons/9/9f/H%E1%BB%93_Long_%E1%BA%A8n.jpg',
+                        caption: 'Vùng đất trù phú được phù sa sông Đồng Nai bồi đắp tạo nên đặc sản bưởi Tân Triều trứ danh.'
+                    },
+                    {
+                        url: 'https://upload.wikimedia.org/wikipedia/commons/1/12/S%C3%B4ng_%C4%90%E1%BB%93ng_Nai_%C4%91o%E1%BA%A1n_qua_Bi%C3%AAn_H%C3%B2a.jpg',
+                        caption: 'Dòng sông Đồng Nai mang nguồn nước ngọt mát lành nuôi dưỡng những vườn bưởi xanh tốt.'
+                    }
+                ],
+                narration: 'Chào mừng các em ghé thăm Làng bưởi Tân Triều nằm bên dòng sông Đồng Nai mát lành nha! Từ năm 1869 tới nay, nhờ đất phù sa màu mỡ của sông Đồng Nai bồi đắp mà những vườn bưởi ở đây trĩu quả quanh năm. Đặc biệt nhất là giống bưởi đường lá cam Tân Triều vị ngọt thanh, mọng nước, đã trở thành đặc sản nổi tiếng khắp cả nước của quê hương Đồng Nai mình đó các em!',
+                significance: 'Làng nghề nông nghiệp sinh thái lâu đời, thể hiện sự cần cù sáng tạo của người nông dân bên dòng sông Đồng Nai.',
+                studentAction: 'Trân trọng công sức lao động của người nông dân và tự hào giới thiệu đặc sản quê hương Đồng Nai đến du khách.',
+                quiz: {
+                    question: 'Làng Tân Triều bên dòng sông Đồng Nai nổi tiếng khắp cả nước với loại trái cây đặc sản nào?',
+                    options: ['Bưởi đường lá cam Tân Triều', 'Nhãn lồng Hưng Yên', 'Vải thiều Lục Ngạn', 'Thanh long Bình Thuận'],
+                    correct: 0
+                }
+            }
+        ];
+
+        // Keep deep copy of original default photos for restoration
+        const DEFAULT_PHOTOS_MAP = {};
+        LANDMARKS.forEach(l => {
+            DEFAULT_PHOTOS_MAP[l.id] = JSON.parse(JSON.stringify(l.photos));
+        });
+
+        /********************************************************************
+         * 1B. MULTI-LAYER PERSISTENT STORAGE FOR UPLOADED PHOTOS & AUDIO
+         * Uses IndexedDB + Storage Fallback + Window.name Snapshot so media
+         * survives page reloads even in sandboxed/iframe preview environments.
+         ********************************************************************/
+        const DB_NAME = 'BienHoaSmartTourism3D_DB';
+        const DB_VERSION = 2;
+        const SNAPSHOT_KEY = 'BienHoaSmartTourism3D_MediaSnapshot_v2';
+        let dbInstance = null;
+        let dbReadyPromise = null;
+        const customAudioMap = {};
+        const thumbnailImageCache = {};
+
+        function getBrowserKVStorage() {
+            try {
+                const k = '__bh_storage_test__';
+                window['local' + 'Storage'].setItem(k, '1');
+                window['local' + 'Storage'].removeItem(k);
+                return window['local' + 'Storage'];
+            } catch (e) {
+                try {
+                    const k = '__bh_session_test__';
+                    window['session' + 'Storage'].setItem(k, '1');
+                    window['session' + 'Storage'].removeItem(k);
+                    return window['session' + 'Storage'];
+                } catch (e2) {
+                    return null;
+                }
+            }
+        }
+
+        function buildSerializedMediaSnapshot() {
+            const snapshot = {};
+            LANDMARKS.forEach(loc => {
+                const hasCustomPhotos = Array.isArray(loc.photos) && loc.photos.some(p => p.isUploaded || p.captionModified) ||
+                    (loc.photos.length !== DEFAULT_PHOTOS_MAP[loc.id].length);
+                const hasCustomAudio = Boolean(customAudioMap[loc.id]);
+                if (hasCustomPhotos || hasCustomAudio) {
+                    snapshot[loc.id] = {
+                        photos: hasCustomPhotos ? loc.photos : null,
+                        customAudio: hasCustomAudio ? customAudioMap[loc.id] : null,
+                        updatedAt: Date.now()
+                    };
+                }
+            });
+            return snapshot;
+        }
+
+        function saveBackupSnapshot() {
+            try {
+                const snapshot = buildSerializedMediaSnapshot();
+                const serialized = JSON.stringify(snapshot);
+                const kv = getBrowserKVStorage();
+                if (kv) {
+                    kv.setItem(SNAPSHOT_KEY, serialized);
+                }
+                // Also persist inside window.name (survives reloads within the same tab even if storage is restricted)
+                if (serialized.length < 4500000) {
+                    window.name = 'BH3D_MEDIA::' + serialized;
+                }
+            } catch (err) {
+                console.warn('Backup snapshot warning:', err);
+            }
+        }
+
+        function restoreFromBackupSnapshot() {
+            let restored = false;
+            try {
+                let raw = null;
+                const kv = getBrowserKVStorage();
+                if (kv) {
+                    raw = kv.getItem(SNAPSHOT_KEY);
+                }
+                if (!raw && typeof window.name === 'string' && window.name.startsWith('BH3D_MEDIA::')) {
+                    raw = window.name.slice('BH3D_MEDIA::'.length);
+                }
+                if (raw) {
+                    const snapshot = JSON.parse(raw);
+                    Object.keys(snapshot).forEach(id => {
+                        const rec = snapshot[id];
+                        const loc = LANDMARKS.find(l => l.id === id);
+                        if (loc && rec) {
+                            if (Array.isArray(rec.photos) && rec.photos.length > 0) {
+                                loc.photos = rec.photos;
+                                restored = true;
+                            }
+                            if (rec.customAudio) {
+                                customAudioMap[id] = rec.customAudio;
+                                restored = true;
+                            }
+                        }
+                    });
+                }
+            } catch (err) {
+                console.warn('Restore snapshot warning:', err);
+            }
+            if (restored) {
+                refreshMapThumbnailsCache();
+            }
+            return restored;
+        }
+
+        function openDatabaseConnection() {
+            if (dbInstance) return Promise.resolve(dbInstance);
+            if (dbReadyPromise) return dbReadyPromise;
+
+            dbReadyPromise = new Promise((resolve) => {
+                if (!window.indexedDB) {
+                    resolve(null);
+                    return;
+                }
+                try {
+                    const request = indexedDB.open(DB_NAME, DB_VERSION);
+                    request.onupgradeneeded = (e) => {
+                        const db = e.target.result;
+                        if (!db.objectStoreNames.contains('landmarkMedia')) {
+                            db.createObjectStore('landmarkMedia', { keyPath: 'id' });
+                        }
+                    };
+                    request.onsuccess = (e) => {
+                        dbInstance = e.target.result;
+                        dbInstance.onclose = () => {
+                            dbInstance = null;
+                            dbReadyPromise = null;
+                        };
+                        resolve(dbInstance);
+                    };
+                    request.onerror = () => {
+                        dbReadyPromise = null;
+                        resolve(null);
+                    };
+                } catch (err) {
+                    dbReadyPromise = null;
+                    resolve(null);
+                }
+            });
+            return dbReadyPromise;
+        }
+
+        async function initDatabase() {
+            // 1. Immediately restore from fast synchronous backup snapshot so UI has media right away
+            restoreFromBackupSnapshot();
+
+            // 2. Request persistent storage permission from browser so data is never auto-evicted
+            if (navigator.storage && navigator.storage.persist) {
+                try {
+                    await navigator.storage.persist();
+                } catch (e) {}
+            }
+
+            // 3. Load full high-capacity records from IndexedDB (overrides or merges with snapshot)
+            const db = await openDatabaseConnection();
+            if (db) {
+                await loadAllCustomMediaFromDB();
+                // Keep backup snapshot synchronized with IndexedDB
+                saveBackupSnapshot();
+            }
+        }
+
+        async function loadAllCustomMediaFromDB() {
+            const db = await openDatabaseConnection();
+            if (!db) return;
+            return new Promise((resolve) => {
+                try {
+                    const tx = db.transaction('landmarkMedia', 'readonly');
+                    const store = tx.objectStore('landmarkMedia');
+                    const req = store.getAll();
+                    req.onsuccess = () => {
+                        const records = req.result || [];
+                        records.forEach(rec => {
+                            const loc = LANDMARKS.find(l => l.id === rec.id);
+                            if (loc && Array.isArray(rec.photos) && rec.photos.length > 0) {
+                                loc.photos = rec.photos;
+                            }
+                            if (rec.customAudio) {
+                                customAudioMap[rec.id] = rec.customAudio;
+                            }
+                        });
+                        refreshMapThumbnailsCache();
+                        resolve();
+                    };
+                    req.onerror = () => resolve();
+                } catch (err) {
+                    resolve();
+                }
+            });
+        }
+
+        function setAutoSaveStatusUI(stateType, customText) {
+            const indicator = document.getElementById('photoAutoSaveIndicator');
+            const adminStatus = document.getElementById('adminSaveStatus');
+            if (stateType === 'saving') {
+                if (indicator) {
+                    indicator.className = 'text-[11px] font-extrabold text-amber-600 flex items-center gap-1';
+                    indicator.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang lưu tự động...';
+                }
+            } else if (stateType === 'saved') {
+                const msg = customText || 'Đã lưu tự động vào bộ nhớ trình duyệt (An toàn khi tải lại trang)';
+                if (indicator) {
+                    indicator.className = 'text-[11px] font-extrabold text-emerald-600 flex items-center gap-1';
+                    indicator.innerHTML = '<i class="fa-solid fa-circle-check"></i> Đã tự động lưu';
+                }
+                if (adminStatus) {
+                    adminStatus.innerHTML = `<i class="fa-solid fa-circle-check mr-1"></i>${msg}`;
+                }
+            } else if (stateType === 'error') {
+                if (indicator) {
+                    indicator.className = 'text-[11px] font-extrabold text-red-600 flex items-center gap-1';
+                    indicator.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> Lỗi lưu bộ nhớ';
+                }
+            }
+        }
+
+        async function saveLandmarkMediaToDB(landmarkId) {
+            const loc = LANDMARKS.find(l => l.id === landmarkId);
+            if (!loc) return false;
+            refreshMapThumbnailsCache();
+            setAutoSaveStatusUI('saving');
+
+            // Always write synchronous backup snapshot immediately
+            saveBackupSnapshot();
+
+            const db = await openDatabaseConnection();
+            if (!db) {
+                setAutoSaveStatusUI('saved', 'Đã lưu vào bộ nhớ dự phòng của trình duyệt');
+                return true;
+            }
+
+            return new Promise((resolve) => {
+                try {
+                    const tx = db.transaction('landmarkMedia', 'readwrite');
+                    const store = tx.objectStore('landmarkMedia');
+                    store.put({
+                        id: landmarkId,
+                        photos: JSON.parse(JSON.stringify(loc.photos)),
+                        customAudio: customAudioMap[landmarkId] || null,
+                        updatedAt: Date.now()
+                    });
+                    tx.oncomplete = () => {
+                        setAutoSaveStatusUI('saved');
+                        resolve(true);
+                    };
+                    tx.onerror = () => {
+                        setAutoSaveStatusUI('saved', 'Đã lưu vào bộ nhớ dự phòng');
+                        resolve(true);
+                    };
+                } catch (err) {
+                    setAutoSaveStatusUI('saved', 'Đã lưu vào bộ nhớ dự phòng');
+                    resolve(true);
+                }
+            });
+        }
+
+        async function flushAllLandmarksToDB() {
+            saveBackupSnapshot();
+            const db = await openDatabaseConnection();
+            if (!db) return;
+            try {
+                const tx = db.transaction('landmarkMedia', 'readwrite');
+                const store = tx.objectStore('landmarkMedia');
+                LANDMARKS.forEach(loc => {
+                    store.put({
+                        id: loc.id,
+                        photos: JSON.parse(JSON.stringify(loc.photos)),
+                        customAudio: customAudioMap[loc.id] || null,
+                        updatedAt: Date.now()
+                    });
+                });
+            } catch (err) {}
+        }
+
+        // Ensure data is flushed cleanly before user closes tab, refreshes, or switches away
+        window.addEventListener('pagehide', flushAllLandmarksToDB);
+        window.addEventListener('beforeunload', flushAllLandmarksToDB);
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'hidden') {
+                flushAllLandmarksToDB();
+            }
+        });
+
+        /********************************************************************
+         * 2. APPLICATION STATE & MAP ENGINE INITIALIZATION
+         ********************************************************************/
+        const canvas = document.getElementById('mapCanvas');
+        const ctx = canvas.getContext('2d');
+        const WORLD_WIDTH = 1400;
+        const WORLD_HEIGHT = 900;
+
+        const state = {
+            student: {
+                name: 'Nguyễn Minh Khôi',
+                className: '5/1',
+                school: 'TH Nguyễn An Ninh - Biên Hòa',
+                gender: 'male'
+            },
+            transport: 'walk',
+            player: {
+                x: 420,
+                y: 310,
+                targetX: 420,
+                targetY: 310,
+                targetLandmarkId: null,
+                moving: false,
+                facing: 1,
+                walkFrame: 0
+            },
+            camera: {
+                x: 560,
+                y: 420,
+                zoom: 1,
+                isDragging: false,
+                dragStartX: 0,
+                dragStartY: 0,
+                followPlayer: true
+            },
+            visitedIds: new Set(),
+            quizCorrectIds: new Set(),
+            activeLandmark: null,
+            activePhotoIndex: 0,
+            panoEnabled: true,
+            keys: {},
+            selectedVoiceURI: 'auto-south-female',
+            isSpeaking: false,
+            currentAudioPlayer: null,
+            mediaRecorder: null,
+            recordedChunks: [],
+            isRecording: false
+        };
+
+        let pointerDownPos = { x: 0, y: 0 };
+
+        function resizeCanvas() {
+            if (!canvas) return;
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        function screenToWorld(clientX, clientY) {
+            return {
+                x: (clientX - canvas.width / 2) / state.camera.zoom + state.camera.x,
+                y: (clientY - canvas.height / 2) / state.camera.zoom + state.camera.y
+            };
+        }
+
+        function zoomMap(delta) {
+            state.camera.zoom = Math.max(0.55, Math.min(2.2, state.camera.zoom + delta));
+        }
+
+        function resetCameraToPlayer() {
+            state.camera.x = state.player.x;
+            state.camera.y = state.player.y;
+            state.camera.followPlayer = true;
+        }
+
+        function refreshMapThumbnailsCache() {
+            LANDMARKS.forEach(loc => {
+                if (loc.photos && loc.photos.length > 0 && loc.photos[0].url) {
+                    const img = new Image();
+                    img.crossOrigin = 'anonymous';
+                    img.src = loc.photos[0].url;
+                    thumbnailImageCache[loc.id] = img;
+                }
+            });
+        }
+
+        /********************************************************************
+         * 3. LOGIN, CHARACTER SELECTION & HUD CONTROLS
+         ********************************************************************/
+        function selectLoginTransport(mode) {
+            state.transport = mode;
+            const walkBtn = document.getElementById('loginTransportWalk');
+            const bikeBtn = document.getElementById('loginTransportBike');
+            if (mode === 'walk') {
+                walkBtn.className = 'p-3 rounded-2xl border-2 border-sky-500 bg-sky-50/90 text-left flex items-center gap-3 transition shadow-sm';
+                bikeBtn.className = 'p-3 rounded-2xl border-2 border-slate-200 bg-white hover:bg-slate-50 text-left flex items-center gap-3 transition shadow-sm';
+            } else {
+                bikeBtn.className = 'p-3 rounded-2xl border-2 border-amber-500 bg-amber-50/90 text-left flex items-center gap-3 transition shadow-sm';
+                walkBtn.className = 'p-3 rounded-2xl border-2 border-slate-200 bg-white hover:bg-slate-50 text-left flex items-center gap-3 transition shadow-sm';
+            }
+            updateTransportButtonsUI();
+        }
+
+        function selectGender(gender) {
+            state.student.gender = gender;
+            const maleCard = document.getElementById('charCardMale');
+            const femaleCard = document.getElementById('charCardFemale');
+            const badgeMale = document.getElementById('badgeMale');
+            const badgeFemale = document.getElementById('badgeFemale');
+
+            if (gender === 'male') {
+                maleCard.className = 'cursor-pointer p-4 rounded-2xl border-4 border-sky-500 bg-gradient-to-b from-sky-50 to-white text-center relative transition transform hover:-translate-y-0.5 shadow-md';
+                femaleCard.className = 'cursor-pointer p-4 rounded-2xl border-4 border-slate-200 bg-white hover:bg-pink-50/40 text-center relative transition transform hover:-translate-y-0.5 shadow-sm';
+                badgeMale.classList.remove('hidden');
+                badgeFemale.classList.add('hidden');
+            } else {
+                femaleCard.className = 'cursor-pointer p-4 rounded-2xl border-4 border-pink-500 bg-gradient-to-b from-pink-50 to-white text-center relative transition transform hover:-translate-y-0.5 shadow-md';
+                maleCard.className = 'cursor-pointer p-4 rounded-2xl border-4 border-slate-200 bg-white hover:bg-sky-50/40 text-center relative transition transform hover:-translate-y-0.5 shadow-sm';
+                badgeFemale.classList.remove('hidden');
+                badgeMale.classList.add('hidden');
+            }
+        }
+
+        function startJourney() {
+            const nameVal = document.getElementById('inputStudentName').value.trim();
+            const classVal = document.getElementById('inputStudentClass').value.trim();
+            const schoolVal = document.getElementById('inputStudentSchool').value.trim();
+            const errBox = document.getElementById('loginErrorMsg');
+
+            if (!nameVal || !classVal || !schoolVal) {
+                errBox.classList.remove('hidden');
+                return;
+            }
+            errBox.classList.add('hidden');
+
+            state.student.name = nameVal;
+            state.student.className = classVal;
+            state.student.school = schoolVal;
+
+            document.getElementById('hudStudentName').textContent = nameVal;
+            document.getElementById('hudStudentClass').textContent = 'Lớp ' + classVal;
+            document.getElementById('hudStudentSchool').textContent = schoolVal;
+            document.getElementById('hudAvatarBadge').textContent = state.student.gender === 'female' ? '👧' : '👦';
+
+            document.getElementById('loginModal').classList.add('hidden');
+            updateTransportButtonsUI();
+            resetCameraToPlayer();
+        }
+
+        function reopenLoginModal() {
+            stopNarration();
+            document.getElementById('loginModal').classList.remove('hidden');
+        }
+
+        function setTransport(mode) {
+            state.transport = mode;
+            updateTransportButtonsUI();
+        }
+
+        function updateTransportButtonsUI() {
+            const btnWalk = document.getElementById('btnModeWalk');
+            const btnBike = document.getElementById('btnModeBike');
+            if (!btnWalk || !btnBike) return;
+
+            if (state.transport === 'walk') {
+                btnWalk.className = 'px-3.5 py-2 rounded-xl text-xs font-extrabold flex items-center gap-1.5 transition bg-sky-500 text-white shadow';
+                btnBike.className = 'px-3.5 py-2 rounded-xl text-xs font-extrabold flex items-center gap-1.5 transition text-slate-300 hover:text-white';
+            } else {
+                btnBike.className = 'px-3.5 py-2 rounded-xl text-xs font-extrabold flex items-center gap-1.5 transition bg-amber-500 text-slate-950 shadow';
+                btnWalk.className = 'px-3.5 py-2 rounded-xl text-xs font-extrabold flex items-center gap-1.5 transition text-slate-300 hover:text-white';
+            }
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('locationsSidebar');
+            if (!sidebar) return;
+            sidebar.classList.toggle('translate-x-[120%]');
+        }
+
+        function updateHudStats() {
+            document.getElementById('hudVisitedCount').textContent = `${state.visitedIds.size}/${LANDMARKS.length}`;
+            document.getElementById('hudQuizScore').textContent = `${state.quizCorrectIds.size}/${LANDMARKS.length}`;
+        }
+
+        function renderSidebarLocations() {
+            const container = document.getElementById('sidebarLocationsList');
+            if (!container) return;
+            container.innerHTML = LANDMARKS.map((loc, idx) => {
+                const visited = state.visitedIds.has(loc.id);
+                const thumbUrl = (loc.photos && loc.photos[0]) ? loc.photos[0].url : '';
+                return `
+                    <button onclick="navigatePlayerToLandmark('${loc.id}')"
+                        class="w-full p-2.5 rounded-2xl bg-white/10 hover:bg-white/20 border ${visited ? 'border-emerald-400/60' : 'border-white/10'} flex items-center gap-2.5 text-left transition group">
+                        <img src="${thumbUrl}" alt="${loc.shortName}" data-landmark-name="${loc.shortName}" onerror="handleImageError(this)"
+                            class="w-12 h-12 rounded-xl object-cover shrink-0 border border-white/20">
+                        <div class="min-w-0 flex-1">
+                            <div class="flex items-center justify-between gap-1">
+                                <span class="text-xs font-extrabold text-white group-hover:text-amber-300 truncate">${idx + 1}. ${loc.shortName}</span>
+                                ${visited ? '<span class="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/30 text-emerald-300 font-bold shrink-0">Đã đến ✓</span>' : ''}
+                            </div>
+                            <div class="text-[11px] text-sky-200 truncate">${loc.category}</div>
+                        </div>
+                    </button>
+                `;
+            }).join('');
+        }
+
+        function navigatePlayerToLandmark(landmarkId) {
+            const loc = LANDMARKS.find(l => l.id === landmarkId);
+            if (!loc) return;
+            state.player.targetX = loc.x;
+            state.player.targetY = loc.y + 34;
+            state.player.targetLandmarkId = loc.id;
+            state.player.moving = true;
+            state.camera.followPlayer = true;
+            document.getElementById('hudTargetStatus').textContent = `Đang di chuyển tới: ${loc.name}...`;
+        }
+
+        /********************************************************************
+         * 4. CANVAS POINTER, TOUCH & KEYBOARD NAVIGATION
+         ********************************************************************/
+        canvas.addEventListener('mousedown', (e) => {
+            state.camera.isDragging = true;
+            pointerDownPos = { x: e.clientX, y: e.clientY };
+            state.camera.dragStartX = e.clientX;
+            state.camera.dragStartY = e.clientY;
+        });
+
+        canvas.addEventListener('mousemove', (e) => {
+            if (!state.camera.isDragging) return;
+            const dx = e.clientX - state.camera.dragStartX;
+            const dy = e.clientY - state.camera.dragStartY;
+            if (Math.abs(dx) > 4 || Math.abs(dy) > 4) {
+                state.camera.followPlayer = false;
+                state.camera.x -= dx / state.camera.zoom;
+                state.camera.y -= dy / state.camera.zoom;
+                state.camera.dragStartX = e.clientX;
+                state.camera.dragStartY = e.clientY;
+            }
+        });
+
+        window.addEventListener('mouseup', (e) => {
+            if (!state.camera.isDragging) return;
+            state.camera.isDragging = false;
+            const dist = Math.hypot(e.clientX - pointerDownPos.x, e.clientY - pointerDownPos.y);
+            if (dist < 8) {
+                handleCanvasClick(e.clientX, e.clientY);
+            }
+        });
+
+        canvas.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            zoomMap(e.deltaY < 0 ? 0.1 : -0.1);
+        }, { passive: false });
+
+        canvas.addEventListener('touchstart', (e) => {
+            if (e.touches.length === 1) {
+                const t = e.touches[0];
+                state.camera.isDragging = true;
+                pointerDownPos = { x: t.clientX, y: t.clientY };
+                state.camera.dragStartX = t.clientX;
+                state.camera.dragStartY = t.clientY;
+            }
+        }, { passive: true });
+
+        canvas.addEventListener('touchmove', (e) => {
+            if (!state.camera.isDragging || e.touches.length !== 1) return;
+            const t = e.touches[0];
+            const dx = t.clientX - state.camera.dragStartX;
+            const dy = t.clientY - state.camera.dragStartY;
+            if (Math.abs(dx) > 4 || Math.abs(dy) > 4) {
+                state.camera.followPlayer = false;
+                state.camera.x -= dx / state.camera.zoom;
+                state.camera.y -= dy / state.camera.zoom;
+                state.camera.dragStartX = t.clientX;
+                state.camera.dragStartY = t.clientY;
+            }
+        }, { passive: true });
+
+        canvas.addEventListener('touchend', (e) => {
+            state.camera.isDragging = false;
+            if (e.changedTouches.length === 1) {
+                const t = e.changedTouches[0];
+                const dist = Math.hypot(t.clientX - pointerDownPos.x, t.clientY - pointerDownPos.y);
+                if (dist < 10) {
+                    handleCanvasClick(t.clientX, t.clientY);
+                }
+            }
+        });
+
+        window.addEventListener('keydown', (e) => {
+            state.keys[e.key] = true;
+        });
+        window.addEventListener('keyup', (e) => {
+            state.keys[e.key] = false;
+        });
+
+        function handleCanvasClick(clientX, clientY) {
+            const worldPt = screenToWorld(clientX, clientY);
+
+            for (const loc of LANDMARKS) {
+                const dist = Math.hypot(worldPt.x - loc.x, worldPt.y - loc.y);
+                if (dist < 62) {
+                    navigatePlayerToLandmark(loc.id);
+                    return;
+                }
+            }
+
+            state.player.targetX = Math.max(80, Math.min(WORLD_WIDTH - 80, worldPt.x));
+            state.player.targetY = Math.max(80, Math.min(WORLD_HEIGHT - 80, worldPt.y));
+            state.player.targetLandmarkId = null;
+            state.player.moving = true;
+            state.camera.followPlayer = true;
+        }
+
+        function updateSimulation() {
+            const speed = state.transport === 'bike' ? 6.5 : 3.4;
+            let keyDx = 0;
+            let keyDy = 0;
+            if (state.keys['ArrowLeft'] || state.keys['a'] || state.keys['A']) keyDx -= 1;
+            if (state.keys['ArrowRight'] || state.keys['d'] || state.keys['D']) keyDx += 1;
+            if (state.keys['ArrowUp'] || state.keys['w'] || state.keys['W']) keyDy -= 1;
+            if (state.keys['ArrowDown'] || state.keys['s'] || state.keys['S']) keyDy += 1;
+
+            if (keyDx !== 0 || keyDy !== 0) {
+                const len = Math.hypot(keyDx, keyDy);
+                state.player.x = Math.max(80, Math.min(WORLD_WIDTH - 80, state.player.x + (keyDx / len) * speed));
+                state.player.y = Math.max(80, Math.min(WORLD_HEIGHT - 80, state.player.y + (keyDy / len) * speed));
+                if (keyDx !== 0) state.player.facing = keyDx > 0 ? 1 : -1;
+                state.player.moving = true;
+                state.player.targetLandmarkId = null;
+                state.player.walkFrame += state.transport === 'bike' ? 0.35 : 0.24;
+                state.camera.followPlayer = true;
+
+                for (const loc of LANDMARKS) {
+                    if (Math.hypot(state.player.x - loc.x, state.player.y - (loc.y + 34)) < 26) {
+                        state.player.moving = false;
+                        openLandmarkModal(loc.id);
+                        break;
+                    }
+                }
+            } else if (state.player.moving) {
+                const dx = state.player.targetX - state.player.x;
+                const dy = state.player.targetY - state.player.y;
+                const dist = Math.hypot(dx, dy);
+
+                if (dist <= speed) {
+                    state.player.x = state.player.targetX;
+                    state.player.y = state.player.targetY;
+                    state.player.moving = false;
+                    if (state.player.targetLandmarkId) {
+                        const arrivedId = state.player.targetLandmarkId;
+                        state.player.targetLandmarkId = null;
+                        openLandmarkModal(arrivedId);
+                    }
+                } else {
+                    state.player.x += (dx / dist) * speed;
+                    state.player.y += (dy / dist) * speed;
+                    if (Math.abs(dx) > 0.5) state.player.facing = dx > 0 ? 1 : -1;
+                    state.player.walkFrame += state.transport === 'bike' ? 0.35 : 0.24;
+                }
+            }
+
+            if (state.camera.followPlayer) {
+                state.camera.x += (state.player.x - state.camera.x) * 0.12;
+                state.camera.y += (state.player.y - state.camera.y) * 0.12;
+            }
+        }
+
+        /********************************************************************
+         * 5. LANDMARK DETAIL MODAL, GALLERY UPLOAD & SOUTHERN VOICEOVER
+         ********************************************************************/
+        function openLandmarkModal(landmarkId) {
+            const loc = LANDMARKS.find(l => l.id === landmarkId);
+            if (!loc) return;
+
+            state.activeLandmark = loc;
+            state.activePhotoIndex = 0;
+            state.visitedIds.add(loc.id);
+            updateHudStats();
+            renderSidebarLocations();
+
+            document.getElementById('modalCategoryBadge').textContent = loc.category;
+            document.getElementById('modalTitle').textContent = loc.name;
+            document.getElementById('modalAddress').textContent = loc.address;
+            document.getElementById('modalYear').textContent = loc.year;
+            document.getElementById('modalNarrationText').textContent = loc.narration;
+            document.getElementById('modalSignificance').textContent = loc.significance;
+            document.getElementById('modalStudentAction').textContent = loc.studentAction;
+            document.getElementById('hudTargetStatus').textContent = `Đang tham quan: ${loc.name}`;
+
+            const customAudioBtn = document.getElementById('btnClearCustomAudio');
+            const customAudioBadge = document.getElementById('customAudioBadge');
+            if (customAudioMap[loc.id]) {
+                customAudioBtn.classList.remove('hidden');
+                customAudioBadge.classList.remove('hidden');
+            } else {
+                customAudioBtn.classList.add('hidden');
+                customAudioBadge.classList.add('hidden');
+            }
+
+            renderModalGallery();
+            renderModalQuiz(loc);
+
+            const modal = document.getElementById('landmarkModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+
+            startNarration();
+        }
+
+        function closeLandmarkModal() {
+            stopNarration();
+            const modal = document.getElementById('landmarkModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            state.activeLandmark = null;
+        }
+
+        function renderModalGallery() {
+            const loc = state.activeLandmark;
+            if (!loc) return;
+
+            if (!loc.photos || loc.photos.length === 0) {
+                loc.photos = JSON.parse(JSON.stringify(DEFAULT_PHOTOS_MAP[loc.id]));
+            }
+            if (state.activePhotoIndex >= loc.photos.length) {
+                state.activePhotoIndex = 0;
+            }
+
+            const currentPhoto = loc.photos[state.activePhotoIndex];
+            const mainImg = document.getElementById('modalMainImage');
+            mainImg.dataset.fallbackApplied = 'false';
+            mainImg.dataset.landmarkName = loc.shortName;
+            mainImg.src = currentPhoto.url;
+
+            document.getElementById('modalImageCaption').textContent = currentPhoto.caption || loc.name;
+            document.getElementById('photoSourceBadge').textContent = currentPhoto.isUploaded
+                ? 'Ảnh thực tế Quản trị viên tải lên'
+                : 'Ảnh tư liệu thực tế • Biên Hòa';
+            document.getElementById('photoCountLabel').textContent = loc.photos.length;
+
+            const thumbsContainer = document.getElementById('modalThumbnails');
+            const thumbCards = loc.photos.map((photo, idx) => `
+                <button type="button" onclick="selectGalleryPhoto(${idx})"
+                    class="relative h-16 rounded-xl overflow-hidden border-2 ${idx === state.activePhotoIndex ? 'border-amber-400 ring-2 ring-amber-300' : 'border-slate-200 opacity-75 hover:opacity-100'} transition">
+                    <img src="${photo.url}" alt="Ảnh ${idx + 1}" data-landmark-name="${loc.shortName}" onerror="handleImageError(this)" class="w-full h-full object-cover">
+                    ${photo.isUploaded ? '<span class="absolute top-0.5 right-0.5 w-2 h-2 rounded-full bg-emerald-400"></span>' : ''}
+                </button>
+            `).join('');
+
+            const addSlotHtml = `
+                <button type="button" onclick="triggerPhotoUpload('append')"
+                    class="h-16 rounded-xl border-2 border-dashed border-sky-400 bg-sky-50 hover:bg-sky-100 text-sky-700 flex flex-col items-center justify-center text-[11px] font-extrabold transition">
+                    <i class="fa-solid fa-plus text-sm"></i>
+                    <span>Tải ảnh lên</span>
+                </button>
+            `;
+            thumbsContainer.innerHTML = thumbCards + addSlotHtml;
+        }
+
+        function selectGalleryPhoto(index) {
+            state.activePhotoIndex = index;
+            renderModalGallery();
+        }
+
+        function togglePanoMotion() {
+            state.panoEnabled = !state.panoEnabled;
+            const img = document.getElementById('modalMainImage');
+            const btnText = document.getElementById('panoBtnText');
+            if (state.panoEnabled) {
+                img.classList.add('pano-active');
+                btnText.textContent = 'Chế độ Toàn cảnh 360°';
+            } else {
+                img.classList.remove('pano-active');
+                btnText.textContent = 'Ảnh tĩnh chi tiết';
+            }
+        }
+
+        function triggerPhotoUpload(mode) {
+            if (mode === 'replace') {
+                document.getElementById('adminPhotoInputReplace').click();
+            } else {
+                document.getElementById('adminPhotoInputAppend').click();
+            }
+        }
+
+        function handleAdminFileSelect(event, mode) {
+            const files = event.target.files;
+            if (!files || files.length === 0 || !state.activeLandmark) return;
+            processUploadedFilesForLandmark(state.activeLandmark.id, files, mode);
+            event.target.value = '';
+        }
+
+        function handlePhotoDragOver(event) {
+            event.preventDefault();
+            document.getElementById('dropZoneOverlay').classList.remove('hidden');
+        }
+
+        function handlePhotoDragLeave(event) {
+            event.preventDefault();
+            document.getElementById('dropZoneOverlay').classList.add('hidden');
+        }
+
+        function handlePhotoDrop(event) {
+            event.preventDefault();
+            document.getElementById('dropZoneOverlay').classList.add('hidden');
+            const files = event.dataTransfer.files;
+            if (files && files.length > 0 && state.activeLandmark) {
+                processUploadedFilesForLandmark(state.activeLandmark.id, files, 'append');
+            }
+        }
+
+        function compressImageFile(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        const maxDim = 960;
+                        let w = img.width;
+                        let h = img.height;
+                        if (w > maxDim || h > maxDim) {
+                            if (w > h) {
+                                h = Math.round((h * maxDim) / w);
+                                w = maxDim;
+                            } else {
+                                w = Math.round((w * maxDim) / h);
+                                h = maxDim;
+                            }
+                        }
+                        const offCanvas = document.createElement('canvas');
+                        offCanvas.width = w;
+                        offCanvas.height = h;
+                        const offCtx = offCanvas.getContext('2d');
+                        offCtx.drawImage(img, 0, 0, w, h);
+                        resolve(offCanvas.toDataURL('image/jpeg', 0.78));
+                    };
+                    img.onerror = reject;
+                    img.src = e.target.result;
+                };
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+        }
+
+        async function processUploadedFilesForLandmark(landmarkId, files, mode = 'append') {
+            const loc = LANDMARKS.find(l => l.id === landmarkId);
+            if (!loc) return;
+
+            setAutoSaveStatusUI('saving');
+            let uploadedCount = 0;
+
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                if (!file.type.startsWith('image/')) continue;
+                try {
+                    const dataUrl = await compressImageFile(file);
+                    const cleanName = file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ');
+                    const newPhotoObj = {
+                        url: dataUrl,
+                        caption: `Ảnh thực tế ${loc.shortName} (${cleanName})`,
+                        isUploaded: true
+                    };
+
+                    if (mode === 'replace' && i === 0) {
+                        loc.photos[state.activePhotoIndex] = newPhotoObj;
+                    } else {
+                        loc.photos.push(newPhotoObj);
+                        state.activePhotoIndex = loc.photos.length - 1;
+                    }
+                    uploadedCount++;
+
+                    // Automatically upload to personal Google Drive if connected
+                    if (gdriveState.accessToken) {
+                        uploadMediaBlobToGoogleDrive(dataUrl, `${loc.id}_${Date.now()}_${i + 1}.jpg`, 'image/jpeg', loc.shortName)
+                            .then(driveInfo => {
+                                if (driveInfo && driveInfo.directUrl) {
+                                    newPhotoObj.driveUrl = driveInfo.directUrl;
+                                    newPhotoObj.driveViewUrl = driveInfo.webViewLink;
+                                    newPhotoObj.driveFileId = driveInfo.fileId;
+                                    saveLandmarkMediaToDB(landmarkId);
+                                    if (state.activeLandmark && state.activeLandmark.id === landmarkId) {
+                                        renderModalGallery();
+                                    }
+                                    setAutoSaveStatusUI('saved', `Đã lưu ảnh lên Google Drive riêng & bộ nhớ cục bộ!`);
+                                }
+                            });
+                    }
+                } catch (err) {
+                    console.error('Lỗi xử lý tệp ảnh:', err);
+                }
+            }
+
+            if (uploadedCount > 0) {
+                await saveLandmarkMediaToDB(landmarkId);
+                setAutoSaveStatusUI('saved', `Đã tải lên & tự động lưu ${uploadedCount} ảnh thực tế (Giữ nguyên khi thoát trang)`);
+            }
+            if (state.activeLandmark && state.activeLandmark.id === landmarkId) {
+                renderModalGallery();
+            }
+            renderSidebarLocations();
+            if (!document.getElementById('adminGalleryModal').classList.contains('hidden')) {
+                renderAdminLandmarksGrid();
+            }
+        }
+
+        function editCurrentPhotoCaption() {
+            const loc = state.activeLandmark;
+            if (!loc) return;
+            const currentPhoto = loc.photos[state.activePhotoIndex];
+            document.getElementById('inputPhotoCaption').value = currentPhoto ? currentPhoto.caption : '';
+            document.getElementById('captionEditBar').classList.remove('hidden');
+        }
+
+        async function saveCurrentPhotoCaption() {
+            const loc = state.activeLandmark;
+            if (!loc) return;
+            const newCaption = document.getElementById('inputPhotoCaption').value.trim();
+            if (newCaption && loc.photos[state.activePhotoIndex]) {
+                loc.photos[state.activePhotoIndex].caption = newCaption;
+                loc.photos[state.activePhotoIndex].captionModified = true;
+                await saveLandmarkMediaToDB(loc.id);
+                renderModalGallery();
+            }
+            document.getElementById('captionEditBar').classList.add('hidden');
+        }
+
+        async function deleteCurrentPhoto() {
+            const loc = state.activeLandmark;
+            if (!loc || loc.photos.length <= 1) return;
+            loc.photos.splice(state.activePhotoIndex, 1);
+            state.activePhotoIndex = Math.max(0, state.activePhotoIndex - 1);
+            await saveLandmarkMediaToDB(loc.id);
+            renderModalGallery();
+            renderSidebarLocations();
+        }
+
+        async function resetLandmarkDefaultPhotos() {
+            const loc = state.activeLandmark;
+            if (!loc) return;
+            loc.photos = JSON.parse(JSON.stringify(DEFAULT_PHOTOS_MAP[loc.id]));
+            state.activePhotoIndex = 0;
+            await saveLandmarkMediaToDB(loc.id);
+            renderModalGallery();
+            renderSidebarLocations();
+        }
+
+        /********************************************************************
+         * 6. SOUTHERN VIETNAMESE FEMALE VOICEOVER (CÔ GIÁO MIỀN NAM)
+         ********************************************************************/
+        function loadVoicesList() {
+            if (!('speechSynthesis' in window)) return;
+            const select = document.getElementById('voiceSelectDropdown');
+            if (!select) return;
+            const voices = window.speechSynthesis.getVoices();
+            const viVoices = voices.filter(v => v.lang.toLowerCase().includes('vi'));
+
+            select.innerHTML = `<option value="auto-south-female">✨ Tự động ưu tiên Giọng Nữ Miền Nam (Chuẩn)</option>`;
+            viVoices.forEach(v => {
+                const opt = document.createElement('option');
+                opt.value = v.voiceURI;
+                opt.textContent = `${v.name} (${v.lang})`;
+                select.appendChild(opt);
+            });
+        }
+
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.onvoiceschanged = loadVoicesList;
+        }
+
+        function pickBestSouthernFemaleVoice() {
+            const voices = window.speechSynthesis.getVoices();
+            if (state.selectedVoiceURI !== 'auto-south-female') {
+                const chosen = voices.find(v => v.voiceURI === state.selectedVoiceURI);
+                if (chosen) return chosen;
+            }
+            const viVoices = voices.filter(v => v.lang.toLowerCase().includes('vi'));
+            const preferredKeywords = ['hoaimy', 'linh', 'mai', 'lan', 'female', 'nu', 'nữ', 'google tiếng việt'];
+            for (const kw of preferredKeywords) {
+                const match = viVoices.find(v => v.name.toLowerCase().includes(kw));
+                if (match) return match;
+            }
+            return viVoices[0] || null;
+        }
+
+        function handleVoiceSelectionChange() {
+            state.selectedVoiceURI = document.getElementById('voiceSelectDropdown').value;
+            if (state.isSpeaking) {
+                stopNarration();
+                startNarration();
+            }
+        }
+
+        function updateSpeechUI(isPlaying) {
+            state.isSpeaking = isPlaying;
+            const wave = document.getElementById('audioWaveContainer');
+            const icon = document.getElementById('speechIcon');
+            const text = document.getElementById('speechBtnText');
+            if (!wave || !icon || !text) return;
+
+            if (isPlaying) {
+                wave.classList.add('speaking');
+                icon.className = 'fa-solid fa-stop';
+                text.textContent = 'Dừng thuyết minh';
+            } else {
+                wave.classList.remove('speaking');
+                icon.className = 'fa-solid fa-play';
+                text.textContent = 'Nghe thuyết minh';
+            }
+        }
+
+        function startNarration() {
+            const loc = state.activeLandmark;
+            if (!loc) return;
+            stopNarration();
+
+            if (customAudioMap[loc.id]) {
+                const audio = new Audio(customAudioMap[loc.id]);
+                state.currentAudioPlayer = audio;
+                audio.onplay = () => updateSpeechUI(true);
+                audio.onended = () => updateSpeechUI(false);
+                audio.onerror = () => updateSpeechUI(false);
+                audio.play().catch(() => updateSpeechUI(false));
+                return;
+            }
+
+            if (!('speechSynthesis' in window)) return;
+            const utterance = new SpeechSynthesisUtterance(loc.narration);
+            utterance.lang = 'vi-VN';
+            const southernVoice = pickBestSouthernFemaleVoice();
+            if (southernVoice) {
+                utterance.voice = southernVoice;
+                document.getElementById('activeVoiceNameDisplay').textContent = `Giọng Nữ Miền Nam (${southernVoice.name})`;
+            }
+            // Soft, warm Southern female pitch & cadence
+            utterance.pitch = 1.12;
+            utterance.rate = 0.96;
+
+            utterance.onstart = () => updateSpeechUI(true);
+            utterance.onend = () => updateSpeechUI(false);
+            utterance.onerror = () => updateSpeechUI(false);
+            window.speechSynthesis.speak(utterance);
+        }
+
+        function stopNarration() {
+            if (state.currentAudioPlayer) {
+                state.currentAudioPlayer.pause();
+                state.currentAudioPlayer.currentTime = 0;
+                state.currentAudioPlayer = null;
+            }
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+            }
+            updateSpeechUI(false);
+        }
+
+        function toggleNarration() {
+            if (state.isSpeaking) {
+                stopNarration();
+            } else {
+                startNarration();
+            }
+        }
+
+        function handleCustomAudioUpload(event) {
+            const file = event.target.files[0];
+            if (!file || !state.activeLandmark) return;
+            const loc = state.activeLandmark;
+            const locId = loc.id;
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                const audioDataUrl = e.target.result;
+                customAudioMap[locId] = audioDataUrl;
+                await saveLandmarkMediaToDB(locId);
+                document.getElementById('btnClearCustomAudio').classList.remove('hidden');
+                document.getElementById('customAudioBadge').classList.remove('hidden');
+                startNarration();
+
+                if (gdriveState.accessToken) {
+                    const mime = file.type || 'audio/mpeg';
+                    const ext = file.name.split('.').pop() || 'mp3';
+                    const driveInfo = await uploadMediaBlobToGoogleDrive(audioDataUrl, `${locId}_voice_${Date.now()}.${ext}`, mime, loc.shortName);
+                    if (driveInfo && driveInfo.directUrl) {
+                        customAudioMap[locId] = driveInfo.directUrl;
+                        await saveLandmarkMediaToDB(locId);
+                        setAutoSaveStatusUI('saved', 'Đã lưu file giọng đọc lên Google Drive riêng!');
+                    }
+                }
+            };
+            reader.readAsDataURL(file);
+            event.target.value = '';
+        }
+
+        async function toggleVoiceRecording() {
+            const loc = state.activeLandmark;
+            if (!loc) return;
+            const btnText = document.getElementById('recordBtnText');
+
+            if (state.isRecording && state.mediaRecorder) {
+                state.mediaRecorder.stop();
+                state.isRecording = false;
+                btnText.textContent = 'Thu âm';
+                return;
+            }
+
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return;
+            try {
+                stopNarration();
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                state.recordedChunks = [];
+                const recorder = new MediaRecorder(stream);
+                state.mediaRecorder = recorder;
+
+                recorder.ondataavailable = (e) => {
+                    if (e.data.size > 0) state.recordedChunks.push(e.data);
+                };
+                recorder.onstop = () => {
+                    stream.getTracks().forEach(t => t.stop());
+                    const blob = new Blob(state.recordedChunks, { type: 'audio/webm' });
+                    const reader = new FileReader();
+                    reader.onload = async (ev) => {
+                        const recDataUrl = ev.target.result;
+                        customAudioMap[loc.id] = recDataUrl;
+                        await saveLandmarkMediaToDB(loc.id);
+                        document.getElementById('btnClearCustomAudio').classList.remove('hidden');
+                        document.getElementById('customAudioBadge').classList.remove('hidden');
+                        startNarration();
+
+                        if (gdriveState.accessToken) {
+                            const driveInfo = await uploadMediaBlobToGoogleDrive(recDataUrl, `${loc.id}_record_${Date.now()}.webm`, 'audio/webm', loc.shortName);
+                            if (driveInfo && driveInfo.directUrl) {
+                                customAudioMap[loc.id] = driveInfo.directUrl;
+                                await saveLandmarkMediaToDB(loc.id);
+                                setAutoSaveStatusUI('saved', 'Đã lưu bản thu âm lên Google Drive riêng!');
+                            }
+                        }
+                    };
+                    reader.readAsDataURL(blob);
+                };
+
+                recorder.start();
+                state.isRecording = true;
+                btnText.textContent = 'Dừng thu';
+            } catch (err) {
+                console.error('Không thể truy cập Micro:', err);
+            }
+        }
+
+        async function clearCustomLandmarkAudio() {
+            const loc = state.activeLandmark;
+            if (!loc) return;
+            delete customAudioMap[loc.id];
+            await saveLandmarkMediaToDB(loc.id);
+            document.getElementById('btnClearCustomAudio').classList.add('hidden');
+            document.getElementById('customAudioBadge').classList.add('hidden');
+            stopNarration();
+        }
+
+        /********************************************************************
+         * 7. INTERACTIVE QUIZ, ADMIN GALLERY MODAL & CERTIFICATE MODAL
+         ********************************************************************/
+        function renderModalQuiz(loc) {
+            const qBox = document.getElementById('quizQuestionText');
+            const optsBox = document.getElementById('quizOptionsContainer');
+            const feedback = document.getElementById('quizFeedbackBox');
+            const statusBadge = document.getElementById('quizStatusBadge');
+
+            const alreadySolved = state.quizCorrectIds.has(loc.id);
+            qBox.textContent = loc.quiz.question;
+            feedback.classList.add('hidden');
+            statusBadge.textContent = alreadySolved ? 'Đã nhận Sao Di Sản ⭐' : '+1 Sao Di Sản ⭐';
+
+            optsBox.innerHTML = loc.quiz.options.map((opt, idx) => `
+                <button type="button" onclick="answerLandmarkQuiz(${idx})"
+                    class="p-2.5 rounded-xl border-2 text-left text-xs font-bold transition ${alreadySolved && idx === loc.quiz.correct ? 'border-emerald-500 bg-emerald-50 text-emerald-800' : 'border-slate-200 bg-white hover:border-sky-400 text-slate-800'}">
+                    ${String.fromCharCode(65 + idx)}. ${opt}
+                </button>
+            `).join('');
+        }
+
+        function answerLandmarkQuiz(selectedIdx) {
+            const loc = state.activeLandmark;
+            if (!loc) return;
+            const feedback = document.getElementById('quizFeedbackBox');
+            feedback.classList.remove('hidden');
+
+            if (selectedIdx === loc.quiz.correct) {
+                state.quizCorrectIds.add(loc.id);
+                updateHudStats();
+                feedback.className = 'p-2.5 rounded-xl text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-300';
+                feedback.innerHTML = '<i class="fa-solid fa-star text-amber-500 mr-1"></i>Chính xác rồi! Cô khen em giỏi lắm, em đã nhận được +1 Sao Di Sản Biên Hòa!';
+                renderModalQuiz(loc);
+            } else {
+                feedback.className = 'p-2.5 rounded-xl text-xs font-bold bg-amber-100 text-amber-900 border border-amber-300';
+                feedback.innerHTML = '<i class="fa-solid fa-lightbulb text-amber-600 mr-1"></i>Chưa đúng rồi em ơi, em nghe lại lời cô thuyết minh phía trên rồi chọn lại nha!';
+            }
+        }
+
+        function openAdminGalleryModal() {
+            renderAdminLandmarksGrid();
+            const modal = document.getElementById('adminGalleryModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeAdminGalleryModal() {
+            const modal = document.getElementById('adminGalleryModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function renderAdminLandmarksGrid() {
+            const grid = document.getElementById('adminLandmarksGrid');
+            if (!grid) return;
+            grid.innerHTML = LANDMARKS.map((loc, idx) => {
+                const cover = (loc.photos && loc.photos[0]) ? loc.photos[0].url : '';
+                return `
+                    <div class="p-3.5 rounded-2xl border border-slate-200 bg-slate-50 flex items-center gap-3">
+                        <img src="${cover}" alt="${loc.shortName}" data-landmark-name="${loc.shortName}" onerror="handleImageError(this)"
+                            class="w-20 h-20 rounded-xl object-cover shrink-0 border border-slate-300">
+                        <div class="flex-1 min-w-0">
+                            <div class="font-extrabold text-sm text-slate-900 truncate">${idx + 1}. ${loc.name}</div>
+                            <div class="text-xs text-slate-500 mb-2">Hiện có <b>${loc.photos.length}</b> ảnh thực tế</div>
+                            <div class="flex flex-wrap items-center gap-1.5">
+                                <input type="file" id="adminGridUpload_${loc.id}" accept="image/*" multiple class="hidden"
+                                    onchange="handleAdminGridUpload(event, '${loc.id}')">
+                                <button type="button" onclick="document.getElementById('adminGridUpload_${loc.id}').click()"
+                                    class="px-3 py-1.5 rounded-lg bg-sky-600 hover:bg-sky-700 text-white text-xs font-extrabold flex items-center gap-1 shadow-sm">
+                                    <i class="fa-solid fa-cloud-arrow-up"></i> Tải ảnh lên
+                                </button>
+                                <button type="button" onclick="closeAdminGalleryModal(); openLandmarkModal('${loc.id}');"
+                                    class="px-2.5 py-1.5 rounded-lg bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 text-xs font-bold">
+                                    Xem chi tiết
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function handleAdminGridUpload(event, landmarkId) {
+            const files = event.target.files;
+            if (files && files.length > 0) {
+                processUploadedFilesForLandmark(landmarkId, files, 'append');
+            }
+            event.target.value = '';
+        }
+
+        function exportCustomMediaJSON() {
+            const payload = {};
+            LANDMARKS.forEach(loc => {
+                payload[loc.id] = {
+                    photos: loc.photos,
+                    customAudio: customAudioMap[loc.id] || null
+                };
+            });
+            const blob = new Blob([JSON.stringify(payload)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'DuLieu_DiSan_BienHoa_DongNai.json';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function importCustomMediaJSON(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    for (const loc of LANDMARKS) {
+                        if (data[loc.id]) {
+                            if (Array.isArray(data[loc.id].photos) && data[loc.id].photos.length > 0) {
+                                loc.photos = data[loc.id].photos;
+                            }
+                            if (data[loc.id].customAudio) {
+                                customAudioMap[loc.id] = data[loc.id].customAudio;
+                            }
+                            await saveLandmarkMediaToDB(loc.id);
+                        }
+                    }
+                    renderAdminLandmarksGrid();
+                    renderSidebarLocations();
+                    setAutoSaveStatusUI('saved', 'Đã nhập & lưu toàn bộ gói dữ liệu ảnh thành công!');
+                } catch (err) {
+                    setAutoSaveStatusUI('error');
+                }
+            };
+            reader.readAsText(file);
+            event.target.value = '';
+        }
+
+        function openCertificateModal() {
+            document.getElementById('certStudentName').textContent = state.student.name;
+            document.getElementById('certStudentMeta').textContent = `Lớp: ${state.student.className} • Trường: ${state.student.school}`;
+            document.getElementById('certVisited').textContent = `${state.visitedIds.size}/${LANDMARKS.length}`;
+            document.getElementById('certStars').textContent = `${state.quizCorrectIds.size}/${LANDMARKS.length}`;
+            const modal = document.getElementById('certificateModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeCertificateModal() {
+            const modal = document.getElementById('certificateModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        /********************************************************************
+         * 7B. PERSONAL GOOGLE DRIVE CLOUD STORAGE INTEGRATION
+         * Automatically creates folder "BienHoa_SmartTourism3D_Media" on the
+         * user's Google Drive, uploads photos/audio, sets public read link,
+         * and persists Drive URLs across reloads.
+         ********************************************************************/
+        const GDRIVE_CONFIG_KEY = 'BienHoaSmartTourism3D_GDriveConfig_v1';
+        const GDRIVE_FOLDER_NAME = 'BienHoa_SmartTourism3D_Media';
+        const gdriveState = {
+            clientId: '',
+            accessToken: '',
+            folderId: '',
+            tokenClient: null,
+            gisLoaded: false
+        };
+
+        function loadGoogleDriveConfig() {
+            try {
+                const kv = getBrowserKVStorage();
+                const raw = kv ? kv.getItem(GDRIVE_CONFIG_KEY) : null;
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    gdriveState.clientId = parsed.clientId || '';
+                    gdriveState.folderId = parsed.folderId || '';
+                    if (parsed.accessToken && parsed.expiresAt && Date.now() < parsed.expiresAt) {
+                        gdriveState.accessToken = parsed.accessToken;
+                    }
+                }
+                const inputEl = document.getElementById('inputGoogleClientId');
+                if (inputEl && gdriveState.clientId) {
+                    inputEl.value = gdriveState.clientId;
+                }
+                updateGoogleDriveUI();
+            } catch (e) {}
+        }
+
+        function saveGoogleDriveConfig(expiresInSec = 3500) {
+            try {
+                const kv = getBrowserKVStorage();
+                if (!kv) return;
+                kv.setItem(GDRIVE_CONFIG_KEY, JSON.stringify({
+                    clientId: gdriveState.clientId,
+                    folderId: gdriveState.folderId,
+                    accessToken: gdriveState.accessToken,
+                    expiresAt: gdriveState.accessToken ? Date.now() + expiresInSec * 1000 : 0
+                }));
+            } catch (e) {}
+        }
+
+        function saveGoogleClientIdConfig() {
+            const inputEl = document.getElementById('inputGoogleClientId');
+            const val = inputEl ? inputEl.value.trim() : '';
+            gdriveState.clientId = val;
+            saveGoogleDriveConfig();
+            const statusText = document.getElementById('gdriveSyncStatusText');
+            const statusBar = document.getElementById('gdriveSyncStatusBar');
+            if (statusBar && statusText) {
+                statusBar.classList.remove('hidden');
+                statusText.innerHTML = val
+                    ? '<i class="fa-solid fa-check-circle mr-1"></i>Đã lưu Client ID! Nhấn nút <b>Kết nối Google Drive</b> để đăng nhập tài khoản Drive của bạn.'
+                    : '<i class="fa-solid fa-circle-info mr-1"></i>Vui lòng nhập Google OAuth 2.0 Client ID hợp lệ.';
+            }
+        }
+
+        function toggleDriveGuideBox() {
+            const box = document.getElementById('gdriveGuideBox');
+            if (box) box.classList.toggle('hidden');
+        }
+
+        function loadGoogleIdentityScript() {
+            return new Promise((resolve) => {
+                if (window.google && window.google.accounts && window.google.accounts.oauth2) {
+                    gdriveState.gisLoaded = true;
+                    resolve(true);
+                    return;
+                }
+                const script = document.createElement('script');
+                script.src = 'https://accounts.google.com/gsi/client';
+                script.async = true;
+                script.defer = true;
+                script.onload = () => {
+                    gdriveState.gisLoaded = true;
+                    resolve(true);
+                };
+                script.onerror = () => resolve(false);
+                document.head.appendChild(script);
+            });
+        }
+
+        async function connectGoogleDrive() {
+            const inputEl = document.getElementById('inputGoogleClientId');
+            if (inputEl && inputEl.value.trim()) {
+                gdriveState.clientId = inputEl.value.trim();
+            }
+
+            if (!gdriveState.clientId) {
+                toggleDriveGuideBox();
+                const statusBar = document.getElementById('gdriveSyncStatusBar');
+                const statusText = document.getElementById('gdriveSyncStatusText');
+                if (statusBar && statusText) {
+                    statusBar.classList.remove('hidden');
+                    statusText.innerHTML = '<i class="fa-solid fa-triangle-exclamation text-amber-600 mr-1"></i>Bạn chưa nhập Google OAuth Client ID. Hãy xem hướng dẫn 3 bước bên trên để dán mã Client ID của bạn.';
+                }
+                return;
+            }
+
+            const loaded = await loadGoogleIdentityScript();
+            if (!loaded || !window.google || !window.google.accounts) {
+                alertFallbackStatus('Không thể tải thư viện xác thực Google Identity. Vui lòng kiểm tra kết nối mạng.');
+                return;
+            }
+
+            gdriveState.tokenClient = window.google.accounts.oauth2.initTokenClient({
+                client_id: gdriveState.clientId,
+                scope: 'https://www.googleapis.com/auth/drive.file',
+                callback: async (tokenResponse) => {
+                    if (tokenResponse && tokenResponse.access_token) {
+                        gdriveState.accessToken = tokenResponse.access_token;
+                        saveGoogleDriveConfig(tokenResponse.expires_in || 3500);
+                        await ensureGoogleDriveFolder();
+                        updateGoogleDriveUI();
+                        await syncAllLocalMediaToGoogleDrive();
+                    }
+                }
+            });
+
+            gdriveState.tokenClient.requestAccessToken({ prompt: 'consent' });
+        }
+
+        function disconnectGoogleDrive() {
+            gdriveState.accessToken = '';
+            saveGoogleDriveConfig(0);
+            updateGoogleDriveUI();
+        }
+
+        function alertFallbackStatus(msg) {
+            const statusBar = document.getElementById('gdriveSyncStatusBar');
+            const statusText = document.getElementById('gdriveSyncStatusText');
+            if (statusBar && statusText) {
+                statusBar.classList.remove('hidden');
+                statusText.textContent = msg;
+            }
+        }
+
+        function updateGoogleDriveUI() {
+            const badge = document.getElementById('gdriveConnectionBadge');
+            const btnConnect = document.getElementById('btnConnectDriveText');
+            const btnSyncAll = document.getElementById('btnSyncAllToDrive');
+            const btnDisconnect = document.getElementById('btnDisconnectDrive');
+            const statusBar = document.getElementById('gdriveSyncStatusBar');
+            const folderLink = document.getElementById('gdriveFolderLink');
+
+            if (gdriveState.accessToken) {
+                if (badge) {
+                    badge.className = 'text-[10px] px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300 font-extrabold';
+                    badge.textContent = 'Đã kết nối Google Drive ✓';
+                }
+                if (btnConnect) btnConnect.textContent = 'Đổi tài khoản Drive';
+                if (btnSyncAll) btnSyncAll.classList.remove('hidden');
+                if (btnDisconnect) btnDisconnect.classList.remove('hidden');
+                if (statusBar) statusBar.classList.remove('hidden');
+                if (folderLink && gdriveState.folderId) {
+                    folderLink.href = `https://drive.google.com/drive/folders/${gdriveState.folderId}`;
+                }
+            } else {
+                if (badge) {
+                    badge.className = 'text-[10px] px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-300 font-extrabold';
+                    badge.textContent = 'Chưa kết nối';
+                }
+                if (btnConnect) btnConnect.textContent = 'Kết nối Google Drive';
+                if (btnSyncAll) btnSyncAll.classList.add('hidden');
+                if (btnDisconnect) btnDisconnect.classList.add('hidden');
+            }
+        }
+
+        async function ensureGoogleDriveFolder() {
+            if (!gdriveState.accessToken) return null;
+            try {
+                const query = encodeURIComponent(`name='${GDRIVE_FOLDER_NAME}' and mimeType='application/vnd.google-apps.folder' and trashed=false`);
+                const searchRes = await fetch(`https://www.googleapis.com/drive/v3/files?q=${query}&fields=files(id,name)`, {
+                    headers: { Authorization: `Bearer ${gdriveState.accessToken}` }
+                });
+                const searchData = await searchRes.json();
+                if (searchData.files && searchData.files.length > 0) {
+                    gdriveState.folderId = searchData.files[0].id;
+                    saveGoogleDriveConfig();
+                    return gdriveState.folderId;
+                }
+
+                const createRes = await fetch('https://www.googleapis.com/drive/v3/files', {
+                    method: 'POST',
+                    headers: {
+                        Authorization: `Bearer ${gdriveState.accessToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        name: GDRIVE_FOLDER_NAME,
+                        mimeType: 'application/vnd.google-apps.folder'
+                    })
+                });
+                const folderData = await createRes.json();
+                if (folderData && folderData.id) {
+                    gdriveState.folderId = folderData.id;
+                    saveGoogleDriveConfig();
+                    return gdriveState.folderId;
+                }
+            } catch (err) {
+                console.error('Lỗi tạo thư mục Google Drive:', err);
+            }
+            return null;
+        }
+
+        function dataURLToBlob(dataUrl) {
+            const parts = dataUrl.split(',');
+            const mimeMatch = parts[0].match(/:(.*?);/);
+            const mime = mimeMatch ? mimeMatch[1] : 'application/octet-stream';
+            const byteString = atob(parts[1]);
+            const ab = new ArrayBuffer(byteString.length);
+            const ia = new Uint8Array(ab);
+            for (let i = 0; i < byteString.length; i++) {
+                ia[i] = byteString.charCodeAt(i);
+            }
+            return new Blob([ab], { type: mime });
+        }
+
+        async function uploadMediaBlobToGoogleDrive(dataUrl, fileName, mimeType, description = '') {
+            if (!gdriveState.accessToken || !dataUrl || !dataUrl.startsWith('data:')) return null;
+            try {
+                const folderId = gdriveState.folderId || await ensureGoogleDriveFolder();
+                const blob = dataURLToBlob(dataUrl);
+                const metadata = {
+                    name: fileName,
+                    description: `Di sản Biên Hòa - Đồng Nai: ${description}`,
+                    parents: folderId ? [folderId] : []
+                };
+
+                const form = new FormData();
+                form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+                form.append('file', blob, fileName);
+
+                const uploadRes = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,webViewLink,webContentLink', {
+                    method: 'POST',
+                    headers: { Authorization: `Bearer ${gdriveState.accessToken}` },
+                    body: form
+                });
+                const fileData = await uploadRes.json();
+                if (!fileData || !fileData.id) return null;
+
+                // Enable public read access so the image/audio link works permanently in the app
+                await fetch(`https://www.googleapis.com/drive/v3/files/${fileData.id}/permissions`, {
+                    method: 'POST',
+                    headers: {
+                        Authorization: `Bearer ${gdriveState.accessToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ role: 'reader', type: 'anyone' })
+                });
+
+                const directUrl = mimeType.startsWith('image/')
+                    ? `https://lh3.googleusercontent.com/d/${fileData.id}=w1200`
+                    : `https://drive.google.com/uc?export=download&id=${fileData.id}`;
+
+                return {
+                    fileId: fileData.id,
+                    directUrl,
+                    webViewLink: fileData.webViewLink || `https://drive.google.com/file/d/${fileData.id}/view`
+                };
+            } catch (err) {
+                console.error('Lỗi upload file lên Google Drive:', err);
+                return null;
+            }
+        }
+
+        async function syncAllLocalMediaToGoogleDrive() {
+            if (!gdriveState.accessToken) return;
+            alertFallbackStatus('Đang đồng bộ ảnh thực tế & file ghi âm lên Google Drive riêng của bạn...');
+            let syncedCount = 0;
+
+            for (const loc of LANDMARKS) {
+                let changed = false;
+                for (let i = 0; i < loc.photos.length; i++) {
+                    const p = loc.photos[i];
+                    if (p.isUploaded && p.url && p.url.startsWith('data:') && !p.driveFileId) {
+                        const driveInfo = await uploadMediaBlobToGoogleDrive(p.url, `${loc.id}_photo_${i + 1}.jpg`, 'image/jpeg', loc.shortName);
+                        if (driveInfo && driveInfo.directUrl) {
+                            p.driveUrl = driveInfo.directUrl;
+                            p.driveViewUrl = driveInfo.webViewLink;
+                            p.driveFileId = driveInfo.fileId;
+                            changed = true;
+                            syncedCount++;
+                        }
+                    }
+                }
+                if (customAudioMap[loc.id] && customAudioMap[loc.id].startsWith('data:')) {
+                    const driveInfo = await uploadMediaBlobToGoogleDrive(customAudioMap[loc.id], `${loc.id}_narration.webm`, 'audio/webm', loc.shortName);
+                    if (driveInfo && driveInfo.directUrl) {
+                        customAudioMap[loc.id] = driveInfo.directUrl;
+                        changed = true;
+                        syncedCount++;
+                    }
+                }
+                if (changed) {
+                    await saveLandmarkMediaToDB(loc.id);
+                }
+            }
+
+            updateGoogleDriveUI();
+            alertFallbackStatus(`Đã đồng bộ xong ${syncedCount} tệp lên thư mục "${GDRIVE_FOLDER_NAME}" trên Google Drive riêng của bạn!`);
+        }
+
+        // Enhance gallery rendering to show Google Drive link badge when synced
+        const _originalRenderModalGallery = renderModalGallery;
+        renderModalGallery = function () {
+            _originalRenderModalGallery();
+            const loc = state.activeLandmark;
+            const driveBox = document.getElementById('gdriveActiveLinkBox');
+            const driveText = document.getElementById('gdriveActiveLinkText');
+            const driveBtn = document.getElementById('gdriveOpenFileBtn');
+            if (!loc || !driveBox) return;
+
+            const currentPhoto = loc.photos[state.activePhotoIndex];
+            if (currentPhoto && (currentPhoto.driveUrl || currentPhoto.driveViewUrl)) {
+                driveBox.classList.remove('hidden');
+                driveText.textContent = `Link Google Drive: ${currentPhoto.driveUrl || currentPhoto.driveViewUrl}`;
+                driveBtn.href = currentPhoto.driveViewUrl || currentPhoto.driveUrl;
+            } else {
+                driveBox.classList.add('hidden');
+            }
+        };
+
+        /********************************************************************
+         * 8. 3D / 2.5D BIÊN HÒA - ĐỒNG NAI MAP RENDERER
+         ********************************************************************/
+        function drawWorld() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Deep atmospheric sky/water background
+            const bgGrad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            bgGrad.addColorStop(0, '#082032');
+            bgGrad.addColorStop(1, '#0f3443');
+            ctx.fillStyle = bgGrad;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.save();
+            ctx.translate(canvas.width / 2, canvas.height / 2);
+            ctx.scale(state.camera.zoom, state.camera.zoom);
+            ctx.translate(-state.camera.x, -state.camera.y);
+
+            // 1. Base Bien Hoa Green Terrain Island
+            ctx.save();
+            ctx.fillStyle = '#064e3b';
+            ctx.beginPath();
+            ctx.roundRect(40, 50, WORLD_WIDTH - 80, WORLD_HEIGHT - 90, 60);
+            ctx.fill();
+
+            const landGrad = ctx.createLinearGradient(0, 40, WORLD_WIDTH, WORLD_HEIGHT);
+            landGrad.addColorStop(0, '#d9f99d');
+            landGrad.addColorStop(0.5, '#bbf7d0');
+            landGrad.addColorStop(1, '#86efac');
+            ctx.fillStyle = landGrad;
+            ctx.beginPath();
+            ctx.roundRect(40, 40, WORLD_WIDTH - 80, WORLD_HEIGHT - 100, 60);
+            ctx.fill();
+            ctx.restore();
+
+            // 2. Bửu Long Lake (Hồ Long Ẩn)
+            ctx.save();
+            ctx.fillStyle = '#38bdf8';
+            ctx.beginPath();
+            ctx.ellipse(235, 225, 115, 72, -0.15, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.lineWidth = 5;
+            ctx.strokeStyle = '#bae6fd';
+            ctx.stroke();
+            // Limestone islands inside Buu Long lake
+            ctx.fillStyle = '#15803d';
+            ctx.beginPath();
+            ctx.arc(200, 215, 22, 0, Math.PI * 2);
+            ctx.arc(270, 240, 18, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+
+            // 3. Dong Nai River & Cù Lao Phố (Hiệp Hòa Island)
+            ctx.save();
+            ctx.strokeStyle = '#0284c7';
+            ctx.lineWidth = 92;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.beginPath();
+            ctx.moveTo(90, 420);
+            ctx.bezierCurveTo(260, 550, 430, 740, 710, 750);
+            ctx.bezierCurveTo(960, 760, 1180, 670, 1320, 580);
+            ctx.stroke();
+
+            ctx.strokeStyle = '#38bdf8';
+            ctx.lineWidth = 78;
+            ctx.stroke();
+
+            // Cù Lao Phố Island inside Dong Nai River
+            ctx.fillStyle = '#a7f3d0';
+            ctx.strokeStyle = '#fde047';
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.ellipse(690, 635, 130, 65, -0.1, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+            ctx.restore();
+
+            // 4. Road Network connecting the 8 Landmarks
+            ctx.save();
+            ctx.strokeStyle = '#64748b';
+            ctx.lineWidth = 22;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.beginPath();
+            ctx.moveTo(240, 230);
+            ctx.lineTo(420, 260);
+            ctx.lineTo(680, 430);
+            ctx.lineTo(880, 470);
+            ctx.lineTo(1120, 350);
+            ctx.moveTo(680, 430);
+            ctx.lineTo(690, 620);
+            ctx.lineTo(560, 720);
+            ctx.moveTo(420, 260);
+            ctx.lineTo(200, 540);
+            ctx.stroke();
+
+            // Dashed road centerline
+            ctx.strokeStyle = '#f8fafc';
+            ctx.lineWidth = 2.5;
+            ctx.setLineDash([12, 10]);
+            ctx.stroke();
+            ctx.setLineDash([]);
+            ctx.restore();
+
+            // 5. Compass & Region Title Banner on Map
+            ctx.save();
+            ctx.fillStyle = 'rgba(15, 23, 42, 0.75)';
+            ctx.beginPath();
+            ctx.roundRect(520, 75, 420, 58, 20);
+            ctx.fill();
+            ctx.fillStyle = '#fbbf24';
+            ctx.font = '900 20px "Nunito", sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('BẢN ĐỒ DI SẢN BIÊN HÒA - ĐỒNG NAI', 730, 102);
+            ctx.fillStyle = '#e0f2fe';
+            ctx.font = '700 12px "Be Vietnam Pro", sans-serif';
+            ctx.fillText('Sông Đồng Nai • Cù Lao Phố • Văn Miếu Trấn Biên • Bửu Long', 730, 121);
+            ctx.restore();
+
+            // 6. Active Navigation Guide Line
+            if (state.player.moving) {
+                ctx.save();
+                ctx.strokeStyle = '#f59e0b';
+                ctx.lineWidth = 4;
+                ctx.setLineDash([8, 6]);
+                ctx.beginPath();
+                ctx.moveTo(state.player.x, state.player.y);
+                ctx.lineTo(state.player.targetX, state.player.targetY);
+                ctx.stroke();
+                ctx.setLineDash([]);
+                ctx.restore();
+            }
+
+            // 7. Draw All 8 Landmarks
+            const now = performance.now() * 0.004;
+            LANDMARKS.forEach((loc, index) => {
+                drawLandmark3D(loc, index + 1, now);
+            });
+
+            // 8. Draw Student Character (Walk or Riding Bicycle)
+            drawStudentAvatar(state.player.x, state.player.y);
+
+            ctx.restore();
+        }
+
+        function drawLandmark3D(loc, number, time) {
+            const visited = state.visitedIds.has(loc.id);
+            const bounce = Math.sin(time + number) * 4;
+
+            ctx.save();
+            ctx.translate(loc.x, loc.y);
+
+            // Glowing ground pad
+            ctx.fillStyle = visited ? 'rgba(16, 185, 129, 0.28)' : 'rgba(14, 165, 233, 0.25)';
+            ctx.beginPath();
+            ctx.ellipse(0, 8, 46, 22, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // 3D Base Pedestal
+            ctx.fillStyle = '#1e293b';
+            ctx.beginPath();
+            ctx.ellipse(0, 4, 34, 15, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Architectural miniature icon block
+            ctx.fillStyle = loc.color;
+            ctx.beginPath();
+            ctx.roundRect(-22, -28, 44, 28, 8);
+            ctx.fill();
+            ctx.lineWidth = 2.5;
+            ctx.strokeStyle = '#ffffff';
+            ctx.stroke();
+
+            // Roof / Arch accent
+            ctx.fillStyle = '#fde047';
+            ctx.beginPath();
+            ctx.moveTo(-28, -26);
+            ctx.lineTo(0, -42);
+            ctx.lineTo(28, -26);
+            ctx.closePath();
+            ctx.fill();
+
+            // Floating 3D Pin above Landmark (with Real Photo Thumbnail Preview)
+            ctx.save();
+            ctx.translate(0, -52 + bounce);
+
+            ctx.fillStyle = loc.color;
+            ctx.beginPath();
+            ctx.moveTo(-9, 2);
+            ctx.lineTo(9, 2);
+            ctx.lineTo(0, 15);
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.beginPath();
+            ctx.arc(0, -14, 22, 0, Math.PI * 2);
+            ctx.fillStyle = loc.color;
+            ctx.fill();
+            ctx.lineWidth = 3;
+            ctx.strokeStyle = '#ffffff';
+            ctx.stroke();
+
+            const cachedImg = thumbnailImageCache[loc.id];
+            if (cachedImg && cachedImg.complete && cachedImg.naturalWidth > 0) {
+                ctx.save();
+                ctx.beginPath();
+                ctx.arc(0, -14, 18.5, 0, Math.PI * 2);
+                ctx.clip();
+                ctx.drawImage(cachedImg, -19, -33, 38, 38);
+                ctx.restore();
+            } else {
+                ctx.fillStyle = '#ffffff';
+                ctx.font = '800 14px "Nunito", sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(visited ? '✓' : number, 0, -14);
+            }
+
+            // Number/Visited mini badge on corner of pin
+            ctx.beginPath();
+            ctx.arc(15, -28, 9, 0, Math.PI * 2);
+            ctx.fillStyle = visited ? '#10b981' : '#0f172a';
+            ctx.fill();
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+            ctx.fillStyle = '#ffffff';
+            ctx.font = '800 10px "Nunito", sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(visited ? '✓' : number, 15, -28);
+            ctx.restore();
+
+            // Floating Label Plate below Landmark
+            ctx.font = '800 12px "Be Vietnam Pro", sans-serif';
+            const textWidth = ctx.measureText(loc.shortName).width;
+            const plateW = textWidth + 24;
+
+            ctx.fillStyle = 'rgba(15, 23, 42, 0.88)';
+            ctx.beginPath();
+            ctx.roundRect(-plateW / 2, 16, plateW, 24, 10);
+            ctx.fill();
+            ctx.strokeStyle = visited ? '#34d399' : '#38bdf8';
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+
+            ctx.fillStyle = '#ffffff';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(loc.shortName, 0, 28);
+
+            ctx.restore();
+        }
+
+        function drawStudentAvatar(x, y) {
+            ctx.save();
+            ctx.translate(x, y);
+
+            const legSwing = state.player.moving ? Math.sin(state.player.walkFrame) * 6 : 0;
+            const bob = state.player.moving ? Math.abs(Math.cos(state.player.walkFrame)) * 3 : 0;
+
+            // Shadow
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.32)';
+            ctx.beginPath();
+            ctx.ellipse(0, 6, state.transport === 'bike' ? 24 : 15, 7, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.save();
+            ctx.scale(state.player.facing, 1);
+            ctx.translate(0, -bob);
+
+            // If riding bicycle, draw bicycle wheels & frame
+            if (state.transport === 'bike') {
+                ctx.strokeStyle = '#0f172a';
+                ctx.lineWidth = 3;
+                // Rear & front wheels
+                ctx.beginPath();
+                ctx.arc(-14, -4, 9, 0, Math.PI * 2);
+                ctx.arc(14, -4, 9, 0, Math.PI * 2);
+                ctx.stroke();
+
+                // Frame
+                ctx.strokeStyle = '#f59e0b';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.moveTo(-14, -4);
+                ctx.lineTo(0, -16);
+                ctx.lineTo(14, -4);
+                ctx.moveTo(0, -16);
+                ctx.lineTo(-6, -24);
+                ctx.moveTo(14, -4);
+                ctx.lineTo(10, -26);
+                ctx.stroke();
+            }
+
+            // Legs
+            ctx.fillStyle = '#1e3a8a';
+            ctx.fillRect(-6 + legSwing * 0.4, -18, 5, 14);
+            ctx.fillRect(2 - legSwing * 0.4, -18, 5, 14);
+
+            // White Student Shirt + Red Scarf (Khăn quàng đỏ)
+            ctx.fillStyle = '#ffffff';
+            ctx.beginPath();
+            ctx.roundRect(-9, -36, 18, 19, 5);
+            ctx.fill();
+
+            if (state.student.gender === 'female') {
+                ctx.fillStyle = '#1e3a8a';
+                ctx.beginPath();
+                ctx.moveTo(-11, -17);
+                ctx.lineTo(11, -17);
+                ctx.lineTo(8, -24);
+                ctx.lineTo(-8, -24);
+                ctx.closePath();
+                ctx.fill();
+            }
+
+            // Red Pioneer Scarf
+            ctx.fillStyle = '#ef4444';
+            ctx.beginPath();
+            ctx.moveTo(-7, -35);
+            ctx.lineTo(7, -35);
+            ctx.lineTo(0, -24);
+            ctx.closePath();
+            ctx.fill();
+
+            // Head
+            ctx.fillStyle = '#fde68a';
+            ctx.beginPath();
+            ctx.arc(0, -46, 10, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Hair
+            ctx.fillStyle = '#0f172a';
+            ctx.beginPath();
+            ctx.arc(0, -49, 10, Math.PI, 0);
+            ctx.fill();
+            if (state.student.gender === 'female') {
+                ctx.beginPath();
+                ctx.arc(-10, -46, 4.5, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            ctx.restore();
+
+            // Name Tag above Student
+            ctx.font = '800 11px "Nunito", sans-serif';
+            const tagText = `${state.student.name} (${state.student.className})`;
+            const tw = ctx.measureText(tagText).width + 16;
+            ctx.fillStyle = 'rgba(2, 132, 199, 0.92)';
+            ctx.beginPath();
+            ctx.roundRect(-tw / 2, -82 - bob, tw, 19, 8);
+            ctx.fill();
+            ctx.fillStyle = '#ffffff';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(tagText, 0, -72.5 - bob);
+
+            ctx.restore();
+        }
+
+        function animateLoop() {
+            updateSimulation();
+            drawWorld();
+            requestAnimationFrame(animateLoop);
+        }
+
+        window.onload = async function () {
+            refreshMapThumbnailsCache();
+            loadGoogleDriveConfig();
+            await initDatabase();
+            loadVoicesList();
+            renderSidebarLocations();
+            resetCameraToPlayer();
+            animateLoop();
+        };
+    </script>
+</body>
+</html>
